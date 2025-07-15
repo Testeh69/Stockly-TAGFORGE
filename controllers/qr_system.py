@@ -1,6 +1,6 @@
 import qrcode
 import json
-
+from PyQt6.QtGui import QPixmap
 
 
 
