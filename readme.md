@@ -1,4 +1,4 @@
-!["logo stockly tag-forge"](assets\logo.png)
+![logo stockly tag-forge](./assets/logo.png)
 
 
 # StocklyTagForgeApp
