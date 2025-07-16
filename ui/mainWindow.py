@@ -1,36 +1,50 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel
-from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QSplitter
+from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import Qt
-from ui.subQrWindow import QrCodeWindow
+from ui.subQrWindow import QrCodeWindowLeft as QrCodeWindow
 from controllers.qr_system import QRCodeGenerator
 
 class StockTagForgeMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("STOCKLY TAGFORGE - Application Principale")
-        self.setGeometry(100, 100, 800, 600)
-        self.setWindowIcon(QIcon("assets/icon.png")) # Chemin vers votre icône
+        self.setWindowTitle("STOCKLY TAGFORGE")
+        self.setGeometry(100, 100, 500, 200)
+        self.setWindowIcon(QIcon("assets/logo.png"))
 
-        self.qr_generator = QRCodeGenerator() # Instanciation du Modèle
-
+        self.qr_generator = QRCodeGenerator()
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
+
         self.main_layout = QVBoxLayout(self.central_widget)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
 
         self._setup_main_ui()
 
-    def _setup_main_ui(self):
-        # Exemple: Un titre ou une barre d'en-tête pour la fenêtre principale
-        title_label = QLabel("Bienvenue sur STOCKLY TAGFORGE !")
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px;")
-        self.main_layout.addWidget(title_label)
-        
-        # Instancier et ajouter le QrCodeWindow à la disposition principale
-        self.qr_code_panel = QrCodeWindow()
-        self.main_layout.addWidget(self.qr_code_panel)
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Escape:
+            self.showNormal()
+        elif event.key() == Qt.Key.Key_F11:
+            self.showFullScreen()
 
-        # Facultatif: Ajouter un pied de page ou d'autres éléments à la fenêtre principale
+    def _setup_main_ui(self):
+        # Panneau gauche : formulaire
+        self.qr_code_panel = QrCodeWindow()
+        self.splitter.addWidget(self.qr_code_panel)
+
+        # Panneau droit : affichage QR code
+        self.qr_preview = QLabel("QR Code Preview")
+        self.qr_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.qr_preview.setStyleSheet("background-color: #f0f0f0; border: 1px solid #ccc;")
+        self.splitter.addWidget(self.qr_preview)
+
+        # Ajout du splitter au layout principal
+        self.main_layout.addWidget(self.splitter)
+
+        # Pied de page
         footer_label = QLabel("© 2024 STOCKLY TAGFORGE. Tous droits réservés.")
         footer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.main_layout.addWidget(footer_label)
+
+    def update_qr_preview(self, image_path: str):
+        pixmap = QPixmap(image_path)
+        self.qr_preview.setPixmap(pixmap.scaled(300, 300, Qt.AspectRatioMode.KeepAspectRatio))

@@ -13,7 +13,6 @@
 * **Impression directe** des étiquettes QR via une imprimante configurée sur le système
 * **Interface graphique conviviale** basée sur Qt (PyQt6) avec menus, barres d’outils et zone d’aperçu
 * **Export** des QR codes en image (PNG/SVG) pour usages externes
-* **Configuration personnalisable** : mise en page, taille des étiquettes, marges, police
 
 ---
 
@@ -23,7 +22,6 @@
 * **PyQt6**: interface graphique
 * **qrcode** : génération de QR codes
 * **Pillow** : manipulation d’images
-* **reportlab** : création et mise en page PDF pour impression
 * **pip** (gestionnaire de paquets Python)
 
 ---
@@ -58,21 +56,13 @@
    ```bash
    python main.py
    ```
-2. Dans le menu **Fichier > Importer**, chargez un fichier CSV ou saisissez manuellement les données de stock.
-3. Ajustez les paramètres d’impression dans **Paramètres > Mise en page** :
 
-   * Dimensions de l’étiquette
-   * Marges
-   * Police et taille
-4. Cliquez sur **Générer** pour afficher les QR codes en aperçu.
-5. Utilisez **Imprimer** pour envoyer les étiquettes à votre imprimante.
 
 ---
 
 ## 🔧 Personnalisation
 
-* **templates/** : modèles de mise en page PDF (format, orientation)
-* **config.json** : paramètres par défaut (taille, police, chemin imprimante)
+
 * **assets/** : icônes et ressources graphiques
 
 ---
@@ -84,11 +74,7 @@ StocklyTagForgeApp/
 ├── main.py             # Point d'entrée de l'application
 ├── ui/                 # Fichiers UI (Qt Designer .ui)
 ├── controllers/        # Logique métier et gestion des actions
-├── models/             # Classes de données (StockItem, Settings)
-├── templates/          # Modèles PDF pour l'impression
-├── assets/             # Icônes et images
-├── config.json         # Configuration par défaut
-└── requirements.txt    # Dépendances Python
+└── assets/             # Icônes et images
 ```
 
 ---
