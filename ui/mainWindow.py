@@ -1,6 +1,8 @@
-from PyQt6.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QLabel
 from PyQt6.QtGui import QIcon
-
+from PyQt6.QtCore import Qt
+from ui.elements.side_menu import SideMenu
+from ui.layouts.qr_code_layout import QRCodeLayout
 
 class StockTagForgeMainWindow(QMainWindow):
     def __init__(self, title:str = "STOCKLY TAGFORGE", icon_path:str = "assets/logo.png", dimensions:list[int] = (1000, 800)):
@@ -14,6 +16,12 @@ class StockTagForgeMainWindow(QMainWindow):
 
 
     def _setup_main_ui(self):
-        pass
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QHBoxLayout(central_widget)
+        side_menu = SideMenu(dimensions=(200, 200))
+        layout.addWidget(side_menu, alignment=Qt.AlignmentFlag.AlignLeft)
+        qr_code_layout = QRCodeLayout(dimensions=(800, 600))
+        layout.addWidget(qr_code_layout, alignment=Qt.AlignmentFlag.AlignCenter)
 
        

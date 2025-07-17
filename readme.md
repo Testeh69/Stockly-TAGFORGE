@@ -94,7 +94,7 @@ Les contributions sont les bienvenues ! Merci de :
 
 ## 📄 Licence
 
-Ce projet est distribué sous la licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet n'a pas de Licence.
 
 ### Remerciments:
    #### Pour les assets:

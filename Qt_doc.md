@@ -35,3 +35,6 @@ class MaFenetre(QWidget):
         # Assigner le layout au widget principal
         self.setLayout(layout)
 ```
+
+
+QLayout n'a pas de méthode title, dimension contrairement au QWidget

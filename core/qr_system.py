@@ -1,6 +1,6 @@
 import qrcode
 import json
-
+import uuid
 
 
 class QRCodeGenerator:
@@ -9,7 +9,8 @@ class QRCodeGenerator:
     """
 
     @staticmethod
-    def generate_qr_code(data:str, path_output:str):
+    def generate_qr_code(data:str):
+        path_output = f"qr_code_{uuid.uuid4()}.png"
         json_data = json.dumps(data)
         qr = qrcode.QRCode(
             version=1,
