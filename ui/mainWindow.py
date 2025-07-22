@@ -1,12 +1,15 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QLabel
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt
-from ui.elements.side_menu import SideMenu
-from ui.layouts.qr_code_layout import QRCodeLayout
+
+
+from ui.elements.drag_drop import DragDropElement
+
 
 class StockTagForgeMainWindow(QMainWindow):
     def __init__(self, title:str = "STOCKLY TAGFORGE", icon_path:str = "assets/logo.png", dimensions:list[int] = (1000, 800)):
         super().__init__()
+        self.file = None
         self.setWindowTitle(title)
         self.setGeometry(100, 100, dimensions[0], dimensions[1])
         self.setMinimumSize(500, 200)   
@@ -16,12 +19,10 @@ class StockTagForgeMainWindow(QMainWindow):
 
 
     def _setup_main_ui(self):
-        central_widget = QWidget()
+        central_widget = QWidget(self)
+        layout = QVBoxLayout()
+        self.drag_drop_element = DragDropElement(self)
+        layout.addWidget(self.drag_drop_element, alignment=Qt.AlignmentFlag.AlignCenter)
+        central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
-        layout = QHBoxLayout(central_widget)
-        side_menu = SideMenu(dimensions=(200, 200))
-        layout.addWidget(side_menu, alignment=Qt.AlignmentFlag.AlignLeft)
-        qr_code_layout = QRCodeLayout(dimensions=(800, 600))
-        layout.addWidget(qr_code_layout, alignment=Qt.AlignmentFlag.AlignCenter)
-
-       
+        

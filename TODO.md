@@ -3,12 +3,13 @@
 Suivi des tâches et priorités pour le développement de l’application desktop StocklyTagForgeApp.
 
 ## 🟢 À faire (Backlog)
+
+- Drag And Drop file xslx
+- Traitement du fichier
+- Apparition des données osus forme de tableau
+- Mettre une case pour sélectionner les données à transformer et imprimer
 - Imprimer le qr code
-- Donner un choix pour le path to sauvegarder les images
-- Donner un choix pour les noms des images
-- Génération du qr codes via les paramètres entrées
-- Problème de génération de widget dans la fenetre droite
-- Faire une pile pour imprimer les qr codes sélectionnées d'un coup
+- Faire une impression manuel 
 
 ## 🟡 En cours
 

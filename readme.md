@@ -3,16 +3,15 @@
 
 # StocklyTagForgeApp
 
-**Desktop application** pour la génération et l'impression de QR codes destinés à l’application Stockly.
+**Desktop application** pour la génération et l'impression de QR codes destinés à l’application mobile Stockly.
 
 ---
 
 ## 🚀 Fonctionnalités principales
 
-* **Génération de QR codes** à partir de données de stock (référence, désignation, lot, quantité, etc.)
+* **Génération de QR codes** à partir de données de stock (référence, désignation, lot)
 * **Impression directe** des étiquettes QR via une imprimante configurée sur le système
-* **Interface graphique conviviale** basée sur Qt (PyQt6) avec menus, barres d’outils et zone d’aperçu
-* **Export** des QR codes en image (PNG) pour usages externes
+* **Interface graphique conviviale** basée sur Qt (PyQt6) 
 
 ---
 
