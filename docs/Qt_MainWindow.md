@@ -35,13 +35,23 @@ class MainWindow(QMainWindow):
 ## 🔧 Key Methods
 
 
-**setWindowTitle(str)** : 	Sets the title of the window (displayed in the title bar)
-**setGeometry(x, y, width, height)**:	Defines the initial screen position and dimensions of the window
-**setMinimumSize(width, height)**:	Sets the minimum size the window can be resized to
+**setWindowTitle(txt:str)** : 	Sets the title of the window (displayed in the title bar)
 
-## 💡 Geometry defines where and how big the window is when it launches, not the final resizable bounds.
 
-### 🧪 Example: Creating and Launching a Main Window
+**setGeometry(x:int, y:int, width:int, height:int)**:	Defines the initial screen position and dimensions of the window
+
+
+**setMinimumSize(width:int, height:int)**:	Sets the minimum size the window can be resized to
+
+**setWindowIcon(path:str)**: give the path of png, jpg file that will serve as the icon of the app.
+
+
+self.setCentralWidgets(arg:QWidgets)**: display the widgets passed as a arguments
+
+> Note:
+> 💡 Geometry defines where and how big the window is when it launches, not the final resizable bounds.
+
+## 🧪 Example: Creating and Launching a Main Window
 
 
 ```python
@@ -52,7 +62,7 @@ from PyQt6.QtWidgets import QMainWindow, QApplication
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Test Application")
+        self.setWindowTitle("Test")
         self.setGeometry(100, 100, 800, 600)
         self.setMinimumSize(500, 200)
 
@@ -66,5 +76,11 @@ if __name__ == "__main__":
 ```
 ### 🖼️ Example Output (UI Screenshot)
 <div align="center"> 
-<img src="docs/Qt_MainWindow.png" alt="Qt Main Window Example" width="600"> 
+<img src="assets_docs\Qt_MainWindow.png" alt="Qt Main Window Example" width="600"> 
 </div>
+
+
+
+---
+
+![QtWidgets](Qt_Widgets.md)

@@ -26,4 +26,20 @@ if __name__ == "__main__":
 
 
 **Next**:
-# [!Learn About QtMainWidow](docs\Qt_MainWindow.md)
+# [Learn About QtMainWidow](Qt_MainWindow.md)
+
+
+
+
+**source**:
+
+![doc officiel PyQT6](https://doc.qt.io/qtforpython-6/index.html)
+
+
+
+
+
+
+
+
+
