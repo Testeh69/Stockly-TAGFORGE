@@ -38,3 +38,9 @@ class MaFenetre(QWidget):
 
 
 QLayout n'a pas de méthode title, dimension contrairement au QWidget
+
+
+
+
+
+**QStackWidget** pour link deux widget exemple drag and drop et displayData

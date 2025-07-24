@@ -1,15 +1,21 @@
+import os 
+import pandas as pd
+
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
 from PyQt6.QtGui import QFont
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
+
 
 
 class DragDropElement(QWidget):
+    data = pyqtSignal(pd.DataFrame)
+
     def __init__(self, parent=None):
         super().__init__(parent)
+       
         self.setAcceptDrops(True)
-        self.setFixedSize(200, 200)  # Taille réduite
+        self.setFixedSize(200, 200)  
 
-        # Style moderne : fond gris foncé translucide + bordure fine + arrondie
         self.setStyleSheet("""
             background-color: rgba(40, 40, 40, 0.6);
             border: 1.5px dashed #888;
@@ -33,10 +39,31 @@ class DragDropElement(QWidget):
             event.ignore()
 
     def dropEvent(self, event):
-        if event.mimeData().hasUrls():
-            urls = event.mimeData().urls()
-            for url in urls:
-                print(f"Dropped file: {url.toLocalFile()}")
-            event.accept()
-        else:
-            event.ignore()
+        urls = event.mimeData().urls()
+        print(urls)
+        if not urls:
+            return 
+        path = urls[0].toLocalFile()
+        if path.endswith('.xlsx'):
+            self.load_excel_file(path)
+            print("File loaded successfully:", path)
+       
+            
+
+    def load_excel_file(self, file_path):
+        if not os.path.exists(file_path):
+            return None
+        try:
+            df = pd.read_excel(file_path)
+            columns = [col for col in df.columns if col in ["Reference", "Lot", "Designation"]]
+            self.data = df[columns]
+            self.show_data()
+
+        except Exception as e:
+            print(f"Error loading Excel file: {e}")
+            return None
+        
+
+    def show_data(self):
+        print(self.data)
+        
