@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QStackedWidget
+from PyQt6.QtWidgets import QStackedWidget,QMainWindow, QVBoxLayout,QWidget,QHBoxLayout , QStackedWidget
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt
 
@@ -11,36 +11,54 @@ class StockTagForgeMainWindow(QMainWindow):
         Initialize the main window with a title, icon, and dimensions.
         """
         super().__init__()
-        self.stack_widget = QStackedWidget(self)
-        self.file = None
-        self.drag_drop_element = None
-        self.display_data_element = None
         self.setWindowTitle(title)
-        self.setGeometry(100, 100, dimensions[0], dimensions[1])
-        self.setMinimumSize(500, 200)   
         self.setWindowIcon(QIcon(icon_path))
-        self._setup_main_ui()
-
-
-
-    def _setup_main_ui(self):
-        """Set up the main UI components."""
-        central_widget = QWidget(self)
-        layout = QVBoxLayout()
-        self.drag_drop_element = DragDropElement()
-        self.display_data_element = DisplayDataElement()
-        self.stack_widget.addWidget(self.drag_drop_element)
-        self.stack_widget.addWidget(self.display_data_element)
-        self.drag_drop_element.data.connect(self.display_table)
-        layout.addWidget(self.stack_widget, alignment=Qt.AlignmentFlag.AlignCenter)
-        central_widget.setLayout(layout)
-        self.setCentralWidget(central_widget)
+        self.setGeometry(100, 100, *dimensions)
+        self.setMinimumSize(800, 600)
+        self.stackWidget = QStackedWidget()
+        self.init_ui()
 
     
-    def display_table(self, data):
-        """
-        Display the data in the display_data_element.
-        """
-        self.display_data_element.show_data(data)
-        self.stack_widget.setCurrentWidget(self.display_data_element)
+    def init_ui(self):
+        drag_drop_element = DragDropElement()
+        display_data_element = DisplayDataElement()
+        centered_drag = self.make_centered_widget(drag_drop_element)
+        centered_display = self.make_centered_widget(display_data_element)
+        self.stackWidget.addWidget(centered_drag)
+        self.stackWidget.addWidget(centered_display)
+        self.stackWidget.setCurrentIndex(0)
+        container = QWidget(self)
+        hbox = QHBoxLayout(container)
+        hbox.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        hbox.addWidget(self.stackWidget)
+        container.setLayout(hbox)
+        drag_drop_element.signal.connect(lambda data: self._on_file_dropped(data, display_data_element))
+        self.setCentralWidget(container)
+    
+
+    def _on_file_dropped(self,data, display_element: DisplayDataElement):
+        self.stackWidget.setCurrentIndex(1)
+        display_element.show_data(data)
+
+
+    def make_centered_widget(self,inner_widget: QWidget) -> QWidget:
+        wrapper = QWidget()
+        v_layout = QVBoxLayout(wrapper)
+        v_layout.addStretch()  # espace au-dessus
+        h_layout = QHBoxLayout()
+        h_layout.addStretch()  # espace à gauche
+        h_layout.addWidget(inner_widget)
+        h_layout.addStretch()  # espace à droite
+        v_layout.addLayout(h_layout)
+        v_layout.addStretch()  # espace en dessous
+        return wrapper
+      
+        
+        
+        
+
+
+
+
+
         

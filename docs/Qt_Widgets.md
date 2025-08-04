@@ -63,14 +63,15 @@ class MainWigets(QMWidgets):
 
 ### 🧠 Behavior & Properties
 
-| Method                    | Description                                                  |
-| ------------------------- | ------------------------------------------------------------ |
-| `.isVisible()`            | Returns `True` if the widget is currently visible            |
-| `.setEnabled(True/False)` | Enables or disables interaction with the widget              |
-| `.setToolTip(str)`        | Sets a small tooltip when hovering the mouse over the widget |
-| `.setFocus()`             | Gives the widget keyboard focus                              |
-| `.update()`               | Forces a repaint of the widget                               |
-| `.repaint()`              | Immediately repaints the widget (used rarely)                |
+| Method                      | Description                                                  |
+| ----------------------------| ------------------------------------------------------------ |
+| `.isVisible()`              | Returns `True` if the widget is currently visible            |
+| `.setEnabled(True/False)`   | Enables or disables interaction with the widget              |
+| `.setToolTip(str)`          | Sets a small tooltip when hovering the mouse over the widget |
+| `.setFocus()`               | Gives the widget keyboard focus                              |
+| `.update()`                 | Forces a repaint of the widget                               |
+| `.repaint()`                | Immediately repaints the widget (used rarely)                |
+| `.setAcceptDrop(True/False)`| Accept drop file element                                     |
 
 > Note
 >Any widget derived from QWidget is fundamentally a visual container — it can hold content, layout elements, or even other widgets.

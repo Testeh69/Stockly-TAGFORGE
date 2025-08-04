@@ -43,10 +43,10 @@ class MainWindow(QMainWindow):
 
 **setMinimumSize(width:int, height:int)**:	Sets the minimum size the window can be resized to
 
-**setWindowIcon(path:str)**: give the path of png, jpg file that will serve as the icon of the app.
+**setWindowIcon(QIcon(path:str))**: give the path of png, jpg file that will serve as the icon of the app.
 
 
-self.setCentralWidgets(arg:QWidgets)**: display the widgets passed as a arguments
+**self.setCentralWidgets(arg:QWidgets)**: display the widgets passed as a arguments
 
 > Note:
 > 💡 Geometry defines where and how big the window is when it launches, not the final resizable bounds.

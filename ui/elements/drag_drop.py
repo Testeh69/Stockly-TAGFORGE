@@ -8,7 +8,8 @@ from PyQt6.QtCore import Qt, pyqtSignal
 
 
 class DragDropElement(QWidget):
-    data = pyqtSignal(pd.DataFrame)
+
+    signal = pyqtSignal(pd.DataFrame, name = "data")
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -17,18 +18,19 @@ class DragDropElement(QWidget):
         self.setFixedSize(200, 200)  
 
         self.setStyleSheet("""
-            background-color: rgba(40, 40, 40, 0.6);
+            background-color: rgba(10, 10, 10, 0.2);
             border: 1.5px dashed #888;
             border-radius: 10px;
             color: #ccc;
         """)
+
 
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(6, 6, 6, 6)
 
         self.label = QLabel("Drag And Drop\nfile", self)
         self.label.setFont(QFont("Segoe UI", 18))
-        self.label.setStyleSheet("color: #bbb;")
+        self.label.setStyleSheet("""color: #bbb;                            """)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label)
 
@@ -47,6 +49,8 @@ class DragDropElement(QWidget):
         if path.endswith('.xlsx'):
             self.load_excel_file(path)
             print("File loaded successfully:", path)
+            self.setVisible(False)
+            self.signal.emit(self.data)
        
             
 
