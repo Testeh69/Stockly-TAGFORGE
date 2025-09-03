@@ -1,6 +1,7 @@
 import os 
 import pandas as pd
 
+import unicodedata
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -54,13 +55,30 @@ class DragDropElement(QWidget):
        
             
 
+    def normalize_column_name(self,name: str) -> str:
+        """Normalise un nom de colonne : minuscules + suppression des accents + suppression des espaces inutiles"""
+        name = str(name).strip().lower()
+        name = unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').decode('ASCII')
+        return name
+
     def load_excel_file(self, file_path):
         if not os.path.exists(file_path):
             return None
         try:
             df = pd.read_excel(file_path)
-            columns = [col for col in df.columns if col in ["Reference", "Lot", "Designation"]]
-            self.data = df[columns]
+
+            # Colonnes d'intérêt normalisées
+            desired_cols = ["référence", "lot", "designation"]
+            desired_cols_norm = [self.normalize_column_name(c) for c in desired_cols]
+
+            # Créer un mapping normalisé -> original
+            col_map = {self.normalize_column_name(col): col for col in df.columns}
+
+            # Sélectionner uniquement les colonnes présentes
+            selected_cols = [col_map[c] for c in desired_cols_norm if c in col_map]
+
+            self.data = df[selected_cols]
+
             self.show_data()
 
         except Exception as e:

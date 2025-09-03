@@ -15,6 +15,7 @@ Suivi des tâches et priorités pour le développement de l’application deskto
 ## 🟡 En cours
 - Récupérer les valeurs pour les transformer en qr_code via un bouton imprimer
 
+- Imprimer le qr code
 
 ## 🔴 Bloqué / À valider
 

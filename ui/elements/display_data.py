@@ -2,6 +2,8 @@ from PyQt6.QtWidgets import QTableWidget,QVBoxLayout, QTableWidgetItem, QWidget,
 from PyQt6.QtCore import Qt
 import pandas as pd
 from ui.elements.btn_check import BtnCheck
+from ui.elements.btn_print import BtnPrint
+from core.utils import normalize_column_name
 
 class DisplayDataElement(QWidget):
     def __init__(self, parent=None):
@@ -9,6 +11,7 @@ class DisplayDataElement(QWidget):
 
         self.qr_code_data = []
         self.btn_check = BtnCheck("Select All")
+        self.btn_print = BtnPrint("Print Selected", data_to_print=lambda: self.row_is_checked())
         self.table = QTableWidget()
 
         # Connecter le bouton au slot
@@ -17,6 +20,7 @@ class DisplayDataElement(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(self.table)
         layout.addWidget(self.btn_check)
+        layout.addWidget(self.btn_print)
         
         self.table.setAlternatingRowColors(True)
         self.table.setShowGrid(True)
@@ -53,26 +57,35 @@ class DisplayDataElement(QWidget):
         self.table.resizeColumnsToContents()
     
 
-    def row_is_checked(self, checked_row: bool):
-        self.qr_code_data = []  # reset à chaque appel
+    def row_is_checked(self):
        
-        headers = {self.table.horizontalHeaderItem(col).text(): col for col in range(self.table.columnCount())}
 
-        # Vérifie qu'on a bien les colonnes nécessaires
-        required_cols = ["Lot", "Designation", "Reference"]
+        self.qr_code_data = []  # reset à chaque appel
+
+        # Dictionnaire normalisé : nom colonne -> index
+        headers = {}
+        for col in range(self.table.columnCount()):
+            header_item = self.table.horizontalHeaderItem(col)
+            if header_item is not None:
+                normalized = normalize_column_name(header_item.text())
+                headers[normalized] = col
+
+        # Colonnes nécessaires normalisées
+        required_cols = ["lot", "designation", "reference"]
         if not all(col in headers for col in required_cols):
             print("⚠ Colonnes manquantes dans le tableau !")
-            return
+            return []
 
         for row in range(self.table.rowCount()):
             checkbox_item = self.table.item(row, 0)  # première colonne = checkbox
             if checkbox_item is not None and checkbox_item.checkState() == Qt.CheckState.Checked:
-                lot = self.table.item(row, headers["Lot"]).text()
-                designation = self.table.item(row, headers["Designation"]).text()
-                reference = self.table.item(row, headers["Reference"]).text()
+                lot = self.table.item(row, headers["lot"]).text()
+                designation = self.table.item(row, headers["designation"]).text()
+                reference = self.table.item(row, headers["reference"]).text()
 
                 data = {"lot": lot, "designation": designation, "reference": reference}
                 self.qr_code_data.append(data)
+        return self.qr_code_data
 
     def on_toggle_all(self, checked: bool):
         """Coche/décoche toutes les cases"""
