@@ -73,7 +73,7 @@ StocklyTagForgeApp/
 ├── ui/                 # Fichiers UI (Qt Designer .ui)
 |     ├── elements/
 |     └── windows/
-├── core/        # Logique métier et gestion des actions
+├── core/        # Logique métier, fonctions utilitaires
 └── assets/             # Icônes et images
 ```
 

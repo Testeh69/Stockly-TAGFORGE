@@ -68,7 +68,7 @@ class DragDropElement(QWidget):
             df = pd.read_excel(file_path)
 
             # Colonnes d'intérêt normalisées
-            desired_cols = ["référence", "lot", "designation"]
+            desired_cols = ["référence", "N° lot", "designation"]
             desired_cols_norm = [self.normalize_column_name(c) for c in desired_cols]
 
             # Créer un mapping normalisé -> original
@@ -78,6 +78,7 @@ class DragDropElement(QWidget):
             selected_cols = [col_map[c] for c in desired_cols_norm if c in col_map]
 
             self.data = df[selected_cols]
+            self.data.columns = ["référence", "lot", "designation"] 
 
             self.show_data()
 

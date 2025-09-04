@@ -13,6 +13,8 @@ class DisplayDataElement(QWidget):
         self.btn_check = BtnCheck("Select All")
         self.btn_print = BtnPrint("Print Selected", data_to_print=lambda: self.row_is_checked())
         self.table = QTableWidget()
+        self.table.setMinimumHeight(800)  # augmente ce nombre si besoin
+        self.table.setMinimumWidth(1200)
 
         # Connecter le bouton au slot
         self.btn_check.toggled_signal.connect(self.on_toggle_all)

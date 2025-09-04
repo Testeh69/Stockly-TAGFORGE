@@ -1,10 +1,7 @@
 from PyQt6.QtWidgets import QPushButton
-
-from PyQt6.QtPrintSupport import QPrinter, QPrintDialog
-from PyQt6.QtGui import QTextDocument
+import tempfile
+import win32print
 from core.qr_system import QRCodeGenerator
-
-
 
 class BtnPrint(QPushButton):
 
@@ -13,40 +10,50 @@ class BtnPrint(QPushButton):
         self.data_to_print = data_to_print
         self.clicked.connect(self.on_click)
         self.data_list = None
+
     def on_click(self):
-        # Vérifie si data_to_print est callable (une fonction) et l'appelle
         if callable(self.data_to_print):
-            self.data_list = self.data_to_print()  # ici on récupère la liste
+            self.data_list = self.data_to_print()
         else:
             self.data_list = self.data_to_print
-
         self.print_checked_rows()
-  
-    
+
+    def generate_zpl(self, data_text):
+        """
+        Génère le ZPL centré pour un QR code + texte.
+        Ajuste les positions X,Y selon ton étiquette.
+        """
+        zpl = f"""
+        ^XA
+        ^FO100,50
+        ^BQN,2,5
+        ^FDLA,{data_text}^FS
+        ^FO100,200
+        ^A0N,30,30
+        ^FB400,3,0,C,0
+        ^FD{data_text}^FS
+        ^XZ
+        """
+        return zpl
+
     def print_checked_rows(self):
         if not self.data_list:
             print("⚠ Aucune ligne cochée !")
             return
 
-        all_data = []
-        for data in self.data_list:
-            data_formatted = f"Lot:{data['lot']}, Designation:{data['designation']}, Reference:{data['reference']}"
-            qr_code_path = QRCodeGenerator.generate_qr_code(data_formatted)
+        printer_name = "Zebra ZT230"  # Nom exact de ton imprimante dans Windows
+        hPrinter = win32print.OpenPrinter(printer_name)
 
-            # HTML avec QR + texte
-            all_data.append(
-                f"<div style='margin-bottom:20px; text-align:center;'>"
-                f"<img src='{qr_code_path}' alt='QR Code'><br>"
-                f"{data_formatted}</div>"
-            )
+        try:
+            hJob = win32print.StartDocPrinter(hPrinter, 1, ("Label Print", None, "RAW"))
+            win32print.StartPagePrinter(hPrinter)
 
-        # Créer le document HTML
-        html_content = "<br>".join(all_data)
-        document = QTextDocument()
-        document.setHtml(html_content)
+            for data in self.data_list:
+                data_text = f"Lot:{data['lot']}, Designation:{data['designation']}, Reference:{data['reference']}"
+                zpl_command = self.generate_zpl(data_text)
+                win32print.WritePrinter(hPrinter, zpl_command.encode("utf-8"))
 
-        # Boîte de dialogue d’impression
-        printer = QPrinter()
-        dialog = QPrintDialog(printer, self)
-        if dialog.exec():
-            document.print(printer)
+            win32print.EndPagePrinter(hPrinter)
+            win32print.EndDocPrinter(hPrinter)
+        finally:
+            win32print.ClosePrinter(hPrinter)
