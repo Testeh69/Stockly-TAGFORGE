@@ -3,16 +3,15 @@
 
 # StocklyTagForgeApp
 
-**Desktop application** pour la génération et l'impression de QR codes destinés à l’application Stockly.
+**Desktop application** pour la génération et l'impression de QR codes destinés à l’application mobile Stockly.
 
 ---
 
 ## 🚀 Fonctionnalités principales
 
-* **Génération de QR codes** à partir de données de stock (référence, désignation, lot, quantité, etc.)
+* **Génération de QR codes** à partir de données de stock (référence, désignation, lot)
 * **Impression directe** des étiquettes QR via une imprimante configurée sur le système
-* **Interface graphique conviviale** basée sur Qt (PyQt6) avec menus, barres d’outils et zone d’aperçu
-* **Export** des QR codes en image (PNG/SVG) pour usages externes
+* **Interface graphique conviviale** basée sur Qt (PyQt6) 
 
 ---
 
@@ -22,7 +21,6 @@
 * **PyQt6**: interface graphique
 * **qrcode** : génération de QR codes
 * **Pillow** : manipulation d’images
-* **pip** (gestionnaire de paquets Python)
 
 ---
 
@@ -73,7 +71,9 @@
 StocklyTagForgeApp/
 ├── main.py             # Point d'entrée de l'application
 ├── ui/                 # Fichiers UI (Qt Designer .ui)
-├── controllers/        # Logique métier et gestion des actions
+|     ├── elements/
+|     └── windows/
+├── core/        # Logique métier, fonctions utilitaires
 └── assets/             # Icônes et images
 ```
 
@@ -93,8 +93,13 @@ Les contributions sont les bienvenues ! Merci de :
 
 ## 📄 Licence
 
-Ce projet est distribué sous la licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet n'a pas de Licence.
+
+### Remerciments:
+   #### Pour les assets:
+   - **@Dazzle UI**
+   - **@Esri**
 
 ---
 
-*StocklyTagForgeApp* – Simplifiez la gestion et l'étiquetage de votre stock avec des QR codes professionnels !
+*StocklyTagForgeApp* – Simplifiez la gestion et l'étiquetage de votre stock avec des QR codes.
