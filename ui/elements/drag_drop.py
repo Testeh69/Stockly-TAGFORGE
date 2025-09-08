@@ -2,9 +2,9 @@ import os
 import pandas as pd
 
 import unicodedata
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
-from PyQt6.QtGui import QFont
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
+from PyQt6.QtGui import QFont, QIcon, QColor
+from PyQt6.QtCore import Qt, pyqtSignal, QSize
 
 
 
@@ -14,26 +14,57 @@ class DragDropElement(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-       
-        self.setAcceptDrops(True)
-        self.setFixedSize(200, 200)  
 
-        self.setStyleSheet("""
-            background-color: rgba(10, 10, 10, 0.2);
-            border: 1.5px dashed #888;
-            border-radius: 10px;
-            color: #ccc;
+        self.setAcceptDrops(True)
+        self.setFixedSize(220, 220)  # un peu plus large
+
+        # Layout principal (centre le conteneur)
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Conteneur stylé
+        self.container = QWidget(self)
+        self.container.setObjectName("dropContainer")  # 🔑 identifiant unique
+        self.container.setFixedSize(200, 200)
+        self.container.setStyleSheet("""
+              QWidget#dropContainer {
+                background-color: rgba(10, 10, 10, 0.2);
+                border: 1.5px solid #64E9EE;
+                border-radius: 10px;
+            }
         """)
 
+        # Ombre portée appliquée sur le conteneur
+        shadow = QGraphicsDropShadowEffect(self.container)
+        shadow.setBlurRadius(15)
+        shadow.setXOffset(3)
+        shadow.setYOffset(3)
+        shadow.setColor(QColor("#64E9EE"))
+        self.container.setGraphicsEffect(shadow)
 
-        self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(6, 6, 6, 6)
+        # Layout interne (icône + texte)
+        inner_layout = QVBoxLayout(self.container)
+        inner_layout.setContentsMargins(6, 6, 6, 6)
+        inner_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.label = QLabel("Drag And Drop\nfile", self)
-        self.label.setFont(QFont("Segoe UI", 18))
-        self.label.setStyleSheet("""color: #bbb;                            """)
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.layout.addWidget(self.label)
+        # Icône
+        self.label_icon = QLabel(self.container)
+        self.label_icon.setPixmap(QIcon("assets/file.svg").pixmap(QSize(50, 50)))
+        self.label_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Texte
+        self.label_text = QLabel("Déposez votre fichier Excel ici", self.container)
+        self.label_text.setFont(QFont("Segoe UI", 10))
+        self.label_text.setStyleSheet("color: #bbb;")
+        self.label_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Ajouter au layout interne
+        inner_layout.addWidget(self.label_icon)
+        inner_layout.addWidget(self.label_text)
+
+        # Ajouter le conteneur au layout principal
+        main_layout.addWidget(self.container)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -50,7 +81,6 @@ class DragDropElement(QWidget):
         if path.endswith('.xlsx'):
             self.load_excel_file(path)
             print("File loaded successfully:", path)
-            self.setVisible(False)
             self.signal.emit(self.data)
        
             
@@ -79,6 +109,9 @@ class DragDropElement(QWidget):
 
             self.data = df[selected_cols]
             self.data.columns = ["référence", "lot", "designation"] 
+            self.data = self.data[~self.data.apply(lambda row: row.astype(str).str.lower().str.contains("ne pas utiliser", case=False, na=False).any(), axis=1)]
+            self.data = self.data[~self.data.apply(lambda row: row.astype(str).str.lower().str.contains("ne plus utiliser", case=False, na=False).any(), axis=1)]
+            self.data = self.data[~self.data.apply(lambda row: row.astype(str).str.lower().str.contains("non existant", case=False, na=False).any(), axis=1)]
 
             self.show_data()
 

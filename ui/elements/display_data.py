@@ -3,15 +3,25 @@ from PyQt6.QtCore import Qt
 import pandas as pd
 from ui.elements.btn_check import BtnCheck
 from ui.elements.btn_print import BtnPrint
+from ui.elements.btn_refresh import BtnRefresh
 from core.utils import normalize_column_name
+import numpy as np
+
 
 class DisplayDataElement(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
         self.qr_code_data = []
-        self.btn_check = BtnCheck("Select All")
-        self.btn_print = BtnPrint("Print Selected", data_to_print=lambda: self.row_is_checked())
+        self.btn_check = BtnCheck()
+        self.btn_print = BtnPrint(data_to_print=lambda: self.row_is_checked())
+        self.btn_refresh = BtnRefresh()
+        self.btn_check.setFixedHeight(50)
+        self.btn_print.setFixedHeight(50)
+        self.btn_refresh.setFixedHeight(50)
+        self.btn_refresh.refresh_signal.connect(self.on_refresh)
+
+        
         self.table = QTableWidget()
         self.table.setMinimumHeight(800)  # augmente ce nombre si besoin
         self.table.setMinimumWidth(1200)
@@ -20,10 +30,15 @@ class DisplayDataElement(QWidget):
         self.btn_check.toggled_signal.connect(self.on_toggle_all)
 
         layout = QVBoxLayout(self)
+        menu = QHBoxLayout(self)
+        menu.addWidget(self.btn_check)
+        menu.addWidget(self.btn_print)
+        menu.addWidget(self.btn_refresh)
+
+
         layout.addWidget(self.table)
-        layout.addWidget(self.btn_check)
-        layout.addWidget(self.btn_print)
-        
+        layout.addLayout(menu)
+
         self.table.setAlternatingRowColors(True)
         self.table.setShowGrid(True)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
@@ -51,7 +66,7 @@ class DisplayDataElement(QWidget):
             if self.on_toggle_all:
                 checkbox_item.setCheckState(Qt.CheckState.Checked)
             for col in range(cols):
-                val = str(df.iat[row, col])
+                val = str(df.iat[row, col]) # convertis toute les valeurs en string
                 item = QTableWidgetItem(val)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.table.setItem(row, col + 1, item)
@@ -95,3 +110,12 @@ class DisplayDataElement(QWidget):
             item = self.table.item(row, 0)
             if item is not None:
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+    
+
+
+    def on_refresh(self):
+    # Ici, on veut revenir au drag & drop
+    # On suppose que le parent de type StockTagForgeMainWindow contient stackWidget
+        parent_window = self.window()  # récupère le QMainWindow parent
+        if hasattr(parent_window, "stackWidget"):
+            parent_window.stackWidget.setCurrentIndex(0)

@@ -1,2 +1,6 @@
 test
 monenv
+dist
+build
+__pycache__
+test

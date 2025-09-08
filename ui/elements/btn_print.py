@@ -1,13 +1,16 @@
 from PyQt6.QtWidgets import QPushButton
-import tempfile
 import win32print
-from core.qr_system import QRCodeGenerator
+from PyQt6.QtCore import QSize
+from PyQt6.QtGui import QIcon
+
 
 class BtnPrint(QPushButton):
 
-    def __init__(self, label: str = "ALL", parent=None, data_to_print=None):
-        super().__init__(label, parent)
+    def __init__(self, parent=None, data_to_print=None):
+        super().__init__( parent)
         self.data_to_print = data_to_print
+        self.setIcon(QIcon("assets/print.svg"))  # chemin vers ton icône
+        self.setIconSize(QSize(50, 50))
         self.clicked.connect(self.on_click)
         self.data_list = None
 
@@ -25,11 +28,11 @@ class BtnPrint(QPushButton):
         """
         zpl = f"""
         ^XA
-        ^FO100,50
-        ^BQN,2,5
+        ^FO170,25
+        ^BQN,2,4
         ^FDLA,{data_text}^FS
-        ^FO100,200
-        ^A0N,30,30
+        ^FO100,220
+        ^A0N,14,14
         ^FB400,3,0,C,0
         ^FD{data_text}^FS
         ^XZ
@@ -41,7 +44,7 @@ class BtnPrint(QPushButton):
             print("⚠ Aucune ligne cochée !")
             return
 
-        printer_name = "Zebra ZT230"  # Nom exact de ton imprimante dans Windows
+        printer_name = "ZDesigner ZT230-200dpi ZPL"  # Nom exact de ton imprimante dans Windows
         hPrinter = win32print.OpenPrinter(printer_name)
 
         try:
@@ -49,7 +52,9 @@ class BtnPrint(QPushButton):
             win32print.StartPagePrinter(hPrinter)
 
             for data in self.data_list:
-                data_text = f"Lot:{data['lot']}, Designation:{data['designation']}, Reference:{data['reference']}"
+                data_text = f"Designation:{data['designation']}, Reference:{data['reference']}"
+                if data["lot"] == "nan":
+                    data_text += ", Lot: N/A"
                 zpl_command = self.generate_zpl(data_text)
                 win32print.WritePrinter(hPrinter, zpl_command.encode("utf-8"))
 
