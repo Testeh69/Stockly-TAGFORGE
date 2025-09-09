@@ -1,9 +1,8 @@
 import os 
 import pandas as pd
-import sys
 import unicodedata
-from PyQt6.QtWidgets import QWidget,QApplication, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
-from PyQt6.QtGui import QFont, QIcon, QColor,QPalette
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
+from PyQt6.QtGui import QFont, QIcon, QColor
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
 from core.utils import detect_dark_mode
 

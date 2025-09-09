@@ -1,10 +1,9 @@
 from PyQt6.QtWidgets import QTableWidget,QVBoxLayout, QTableWidgetItem, QWidget, QHBoxLayout
 from PyQt6.QtCore import Qt
 import pandas as pd
-from ui.elements.btn_check import BtnCheck
-from ui.elements.btn_print import BtnPrint
-from ui.elements.btn_refresh import BtnRefresh
-from ui.elements.btn_add import BtnAdd
+from ui.elements.btn.btn_check import BtnCheck
+from ui.elements.btn.btn_print import BtnPrint
+from ui.elements.btn.btn import BtnGen
 from ui.elements.search_bar import SearchBarElement
 from ui.elements.pop_up_add import PopUpAddItem
 from core.utils import normalize_column_name, detect_dark_mode
@@ -20,19 +19,23 @@ class DisplayDataElement(QWidget):
         # --- Composants ---
         self.search_bar_element = SearchBarElement()
         self.search_bar_element.search_signal.connect(self.filter_data)
+        self.search_bar_element.setFixedHeight(40)
 
         # --- Boutons ---
+
         self.btn_check = BtnCheck()
         self.btn_print = BtnPrint(data_to_print=lambda: self.row_is_checked())
-        self.btn_refresh = BtnRefresh()
-        self.btn_add = BtnAdd()
+        self.btn_refresh = BtnGen(icon_path="assets/refresh.svg", size=50)
+        self.btn_add = BtnGen(icon_path="assets/add.svg", size=50)
+        self.btn_erase = BtnGen(icon_path="assets/bin.svg", size=50)
 
         # --- Connexions ---
-        self.btn_refresh.refresh_signal.connect(self.on_refresh)
+        self.btn_refresh.signal.connect(self.on_refresh)
         self.btn_check.toggled_signal.connect(self.on_toggle_all)
-        self.btn_add.add_signal.connect(self.add_items)
+        self.btn_add.signal.connect(self.add_items)
+        self.btn_erase.signal.connect(self.erase_checked_items)
 
-        list_btn = [self.btn_check, self.btn_print, self.btn_refresh, self.btn_add]
+        list_btn = [self.btn_check, self.btn_print, self.btn_refresh, self.btn_add, self.btn_erase]
 
         for btn in list_btn:
             btn.setFixedSize(60, 60)
@@ -49,38 +52,42 @@ class DisplayDataElement(QWidget):
 
         # --- Menu ---
         menu = QWidget()
-        bg_color = "rgba(10, 10, 10, 0.2)" if is_dark_mode else "rgba(240, 240, 240, 0.8)"
-        border_color = "#64E9EE" if is_dark_mode else "#0078D7"
+        bg = "#64E9EE" if is_dark_mode else "#0078D7"
+        border = "#64E9EE" if is_dark_mode else "#0078D7"
         menu.setStyleSheet(f"""
-            border: 1px solid {border_color};
-            border-radius: 5px;
-            padding: 0px;
-            margin: 0px;
-            background-color: {bg_color};
+            border: 1px solid {border};
+            border-radius: 8px;
+            padding: 8px;
+            background-color: {bg};
+            transition: background-color 300ms, border-color 300ms;
         """)
         menu_layout = QVBoxLayout()
         menu_layout.setContentsMargins(0, 0, 0, 0)
         menu_layout.setSpacing(0)
+        
         menu_layout.addWidget(self.btn_check)
         menu_layout.addWidget(self.btn_print)
         menu_layout.addWidget(self.btn_refresh)
         menu_layout.addWidget(self.btn_add)
+        menu_layout.addWidget(self.btn_erase)
         menu.setLayout(menu_layout)
 
         # --- Layout Secondaire ---
-        sub_layout = QHBoxLayout(self)
+        sub_layout = QHBoxLayout()
         sub_layout.addWidget(menu, alignment=Qt.AlignmentFlag.AlignLeft)
         sub_layout.addWidget(self.table)
-        sub_layout.setSpacing(100)
+        sub_layout.setSpacing(150)
         sub_layout.setContentsMargins(0, 0, 0, 0)
         # --- Layout principal ---
         main_layout = QVBoxLayout(self)
         main_layout.addWidget(self.search_bar_element)
         main_layout.addLayout(sub_layout)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(20)
      
 
         # --- Données internes ---
-        self.qr_code_data = []
+        self.data_checked = []
         self.previous_value = None  # Pour restaurer valeur si édition annulée
 
     # --- Gestion édition cellule ---
@@ -117,6 +124,18 @@ class DisplayDataElement(QWidget):
             else:
                 print("⚠ Tous les champs doivent être remplis !")
 
+    def erase_checked_items(self):
+        """Supprime les lignes cochées"""
+        rows_to_erase = []
+        for row in range(self.table.rowCount()):
+            checkbox_item = self.table.item(row, 0)
+            if checkbox_item and checkbox_item.checkState() == Qt.CheckState.Checked:
+                rows_to_erase.append(row)
+
+        for row in reversed(rows_to_erase):
+            self.table.removeRow(row)
+
+
     # --- Affichage des données ---
     def show_data(self, df: pd.DataFrame):
         if df is None or df.empty:
@@ -147,9 +166,11 @@ class DisplayDataElement(QWidget):
 
         self.table.resizeColumnsToContents()
 
+
+
     # --- Récupération des lignes cochées ---
     def row_is_checked(self):
-        self.qr_code_data = []
+        self.data_checked = []
 
         headers = {normalize_column_name(self.table.horizontalHeaderItem(col).text()): col
                    for col in range(self.table.columnCount())
@@ -164,8 +185,8 @@ class DisplayDataElement(QWidget):
             checkbox_item = self.table.item(row, 0)
             if checkbox_item and checkbox_item.checkState() == Qt.CheckState.Checked:
                 data = {col: self.table.item(row, headers[col]).text() for col in required_cols}
-                self.qr_code_data.append(data)
-        return self.qr_code_data
+                self.data_checked.append(data)
+        return self.data_checked
 
     # --- Toggle toutes les cases ---
     def on_toggle_all(self, checked: bool):
@@ -173,6 +194,7 @@ class DisplayDataElement(QWidget):
             item = self.table.item(row, 0)
             if item:
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+
 
     # --- Filtrage par recherche ---
     def filter_data(self, text: str):

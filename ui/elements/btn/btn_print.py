@@ -1,8 +1,8 @@
-from PyQt6.QtWidgets import QPushButton
 import win32print
+from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QIcon
-
+from ui.elements.styles.style_btn import StyleGenericBtn
 
 class BtnPrint(QPushButton):
 
@@ -13,7 +13,7 @@ class BtnPrint(QPushButton):
         self.setIconSize(QSize(50, 50))
         self.clicked.connect(self.on_click)
         self.data_list = None
-        self.styleSheet()
+        self.setStyleSheet(StyleGenericBtn.apply_style_btn())
 
     def on_click(self):
         if callable(self.data_to_print):

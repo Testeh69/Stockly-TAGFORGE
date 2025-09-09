@@ -3,9 +3,9 @@
 Suivi des tâches et priorités pour le développement de l’application desktop StocklyTagForgeApp.
 
 ## 🟢 À faire (Backlog)
-    - Moderniser le menu (vertical)
     - Faire un menu collapsible
-    - Ajouter le bouton supprimer
+    - Moderniser le popup
+
 
 
 
@@ -14,13 +14,16 @@ Suivi des tâches et priorités pour le développement de l’application deskto
 
 
 ## 🟡 En cours
+        - Moderniser le menu (vertical)
+
 
 ## 🔴 Bloqué / À valider
 
 
 ## ✅ Fait
+    - Refactoriser les btn
 -Ajouter un bouton add au menu
-
+- Ajouter le bouton supprimer
 - Imprimer le qr code
 - Faire une impression manuel 
 - compiler l'application
