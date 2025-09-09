@@ -26,6 +26,6 @@ class BtnCheck(QPushButton):
 
     def update_style(self):
         if self.isChecked():
-            self.setStyleSheet("background-color: green; color: white;")
+            self.setStyleSheet(f"background-color: green; color: white;")
         else:
-            self.setStyleSheet("background-color: none; color: black;")
+            self.setStyleSheet(f"background-color: none; color: black;")

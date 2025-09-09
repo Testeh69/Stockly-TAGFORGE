@@ -13,6 +13,7 @@ class BtnPrint(QPushButton):
         self.setIconSize(QSize(50, 50))
         self.clicked.connect(self.on_click)
         self.data_list = None
+        self.styleSheet()
 
     def on_click(self):
         if callable(self.data_to_print):
@@ -55,6 +56,8 @@ class BtnPrint(QPushButton):
                 data_text = f"Designation:{data['designation']}, Reference:{data['reference']}"
                 if data["lot"] == "nan":
                     data_text += ", Lot: N/A"
+                else: 
+                    data_text += f", Lot:{data['lot']}"
                 zpl_command = self.generate_zpl(data_text)
                 win32print.WritePrinter(hPrinter, zpl_command.encode("utf-8"))
 

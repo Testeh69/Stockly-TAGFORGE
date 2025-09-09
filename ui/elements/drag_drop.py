@@ -1,11 +1,11 @@
 import os 
 import pandas as pd
-
+import sys
 import unicodedata
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
-from PyQt6.QtGui import QFont, QIcon, QColor
+from PyQt6.QtWidgets import QWidget,QApplication, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
+from PyQt6.QtGui import QFont, QIcon, QColor,QPalette
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
-
+from core.utils import detect_dark_mode
 
 
 class DragDropElement(QWidget):
@@ -16,26 +16,36 @@ class DragDropElement(QWidget):
         super().__init__(parent)
 
         self.setAcceptDrops(True)
-        self.setFixedSize(220, 220)  # un peu plus large
+        self.setFixedSize(220, 220)
 
-        # Layout principal (centre le conteneur)
+        is_dark_mode = detect_dark_mode()
+
+        text_color = "#FFFFFF" if is_dark_mode else "#000000"
+        icon_path = "assets/file.svg" 
+
+        # Layout principal
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Conteneur stylé
         self.container = QWidget(self)
-        self.container.setObjectName("dropContainer")  # 🔑 identifiant unique
+        self.container.setObjectName("dropContainer")
         self.container.setFixedSize(200, 200)
-        self.container.setStyleSheet("""
-              QWidget#dropContainer {
-                background-color: rgba(10, 10, 10, 0.2);
-                border: 1.5px solid #64E9EE;
+
+        bg_color = "rgba(10, 10, 10, 0.2)" if is_dark_mode else "rgba(240, 240, 240, 0.8)"
+        border_color = "#64E9EE" if is_dark_mode else "#0078D7"
+
+        # Appliquer au conteneur
+        self.container.setStyleSheet(f"""
+            QWidget#dropContainer {{
+                background-color: {bg_color};
+                border: 1.5px solid {border_color};
                 border-radius: 10px;
-            }
+            }}
         """)
 
-        # Ombre portée appliquée sur le conteneur
+        # Ombre portée
         shadow = QGraphicsDropShadowEffect(self.container)
         shadow.setBlurRadius(15)
         shadow.setXOffset(3)
@@ -43,20 +53,20 @@ class DragDropElement(QWidget):
         shadow.setColor(QColor("#64E9EE"))
         self.container.setGraphicsEffect(shadow)
 
-        # Layout interne (icône + texte)
+        # Layout interne
         inner_layout = QVBoxLayout(self.container)
         inner_layout.setContentsMargins(6, 6, 6, 6)
         inner_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Icône
         self.label_icon = QLabel(self.container)
-        self.label_icon.setPixmap(QIcon("assets/file.svg").pixmap(QSize(50, 50)))
+        self.label_icon.setPixmap(QIcon(icon_path).pixmap(QSize(100, 100)))
         self.label_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Texte
         self.label_text = QLabel("Déposez votre fichier Excel ici", self.container)
         self.label_text.setFont(QFont("Segoe UI", 10))
-        self.label_text.setStyleSheet("color: #bbb;")
+        self.label_text.setStyleSheet(f"color: {text_color};")
         self.label_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Ajouter au layout interne
