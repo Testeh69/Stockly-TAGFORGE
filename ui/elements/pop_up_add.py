@@ -36,6 +36,6 @@ class PopUpAddItem(QDialog):
         """Retourne un dictionnaire des valeurs saisies"""
         return {
             "reference": self.reference_input.text(),
-            "designation": self.designation_input.text(),
-            "lot": self.lot_input.text()
+            "lot": self.lot_input.text(),
+            "designation": self.designation_input.text()
         }

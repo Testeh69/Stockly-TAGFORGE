@@ -1,6 +1,9 @@
+import pandas as pd
+import numpy as np
+
 from PyQt6.QtWidgets import QTableWidget,QVBoxLayout, QTableWidgetItem, QWidget, QHBoxLayout
 from PyQt6.QtCore import Qt
-import pandas as pd
+
 from ui.elements.btn.btn_check import BtnCheck
 from ui.elements.btn.btn_print import BtnPrint
 from ui.elements.btn.btn import BtnGen
@@ -8,7 +11,6 @@ from ui.elements.search_bar import SearchBarElement
 from ui.elements.pop_up_add import PopUpAddItem
 from core.utils import normalize_column_name, detect_dark_mode
 
-import numpy as np
 
 class DisplayDataElement(QWidget):
     def __init__(self, parent=None):
@@ -116,7 +118,7 @@ class DisplayDataElement(QWidget):
                 self.table.setItem(row_position, 0, checkbox_item)
 
                 # Données
-                for col, key in enumerate(["reference", "designation", "lot"], start=1):
+                for col, key in enumerate(["reference", "lot","designation"], start=1):
                     item = QTableWidgetItem(data[key]) if data[key] else QTableWidgetItem("N/A")
                     item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                     self.table.setItem(row_position, col, item)

@@ -3,6 +3,8 @@ from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QIcon
 from ui.elements.styles.style_btn import StyleGenericBtn
+from ui.elements.sub_window.menu_print import MenuPrint
+
 
 class BtnPrint(QPushButton):
 
@@ -14,8 +16,23 @@ class BtnPrint(QPushButton):
         self.clicked.connect(self.on_click)
         self.data_list = None
         self.setStyleSheet(StyleGenericBtn.apply_style_btn())
+        self.display_menu_print = False
+        self.menu_print = None if self.display_menu_print == False else MenuPrint()
 
     def on_click(self):
+        if self.display_menu_print == False:
+            self.display_menu_print = True
+            self.menu_print = MenuPrint(data_to_print=self.data_to_print)
+            self.menu_print.show()
+        else:
+            self.display_menu_print = False
+            self.menu_print.close()
+
+
+"""
+    def on_click(self):
+
+
         if callable(self.data_to_print):
             self.data_list = self.data_to_print()
         else:
@@ -23,11 +40,11 @@ class BtnPrint(QPushButton):
         self.print_checked_rows()
 
     def generate_zpl(self, data_text):
-        """
+        
         Génère le ZPL centré pour un QR code + texte.
         Ajuste les positions X,Y selon ton étiquette.
-        """
-        zpl = f"""
+        
+        zpl = f
         ^XA
         ^FO170,25
         ^BQN,2,4
@@ -37,7 +54,7 @@ class BtnPrint(QPushButton):
         ^FB400,3,0,C,0
         ^FD{data_text}^FS
         ^XZ
-        """
+        
         return zpl
 
     def print_checked_rows(self):
@@ -65,3 +82,4 @@ class BtnPrint(QPushButton):
             win32print.EndDocPrinter(hPrinter)
         finally:
             win32print.ClosePrinter(hPrinter)
+"""
