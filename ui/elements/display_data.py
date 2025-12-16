@@ -1,9 +1,7 @@
 import pandas as pd
 import numpy as np
-
 from PyQt6.QtWidgets import QTableWidget,QVBoxLayout, QTableWidgetItem, QWidget, QHBoxLayout
 from PyQt6.QtCore import Qt
-
 from ui.elements.btn.btn_check import BtnCheck
 from ui.elements.btn.btn_print import BtnPrint
 from ui.elements.btn.btn import BtnGen
@@ -26,7 +24,7 @@ class DisplayDataElement(QWidget):
         # --- Boutons ---
 
         self.btn_check = BtnCheck()
-        self.btn_print = BtnPrint(data_to_print=lambda: self.row_is_checked())
+        self.btn_print = BtnPrint(data_to_print= lambda: self.row_is_checked())
         self.btn_refresh = BtnGen(icon_path="assets/refresh.svg", size=50)
         self.btn_add = BtnGen(icon_path="assets/add.svg", size=50)
         self.btn_erase = BtnGen(icon_path="assets/bin.svg", size=50)
@@ -171,7 +169,7 @@ class DisplayDataElement(QWidget):
 
 
     # --- Récupération des lignes cochées ---
-    def row_is_checked(self):
+    def row_is_checked(self) -> list[dict[str,str]]:
         self.data_checked = []
 
         headers = {normalize_column_name(self.table.horizontalHeaderItem(col).text()): col

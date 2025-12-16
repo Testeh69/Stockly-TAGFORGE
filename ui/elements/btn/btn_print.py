@@ -8,7 +8,7 @@ from ui.elements.sub_window.menu_print import MenuPrint
 
 class BtnPrint(QPushButton):
 
-    def __init__(self, parent=None, data_to_print=None):
+    def __init__(self, parent=None, data_to_print:list[dict[str,str]]=None):
         super().__init__( parent)
         self.data_to_print = data_to_print
         self.setIcon(QIcon("assets/print.svg"))  # chemin vers ton icône
@@ -20,66 +20,12 @@ class BtnPrint(QPushButton):
         self.menu_print = None if self.display_menu_print == False else MenuPrint()
 
     def on_click(self):
+        result = self.data_to_print()
         if self.display_menu_print == False:
             self.display_menu_print = True
-            self.menu_print = MenuPrint(data_to_print=self.data_to_print)
+            self.menu_print = MenuPrint(data_to_print=result)
             self.menu_print.show()
         else:
             self.display_menu_print = False
             self.menu_print.close()
 
-
-"""
-    def on_click(self):
-
-
-        if callable(self.data_to_print):
-            self.data_list = self.data_to_print()
-        else:
-            self.data_list = self.data_to_print
-        self.print_checked_rows()
-
-    def generate_zpl(self, data_text):
-        
-        Génère le ZPL centré pour un QR code + texte.
-        Ajuste les positions X,Y selon ton étiquette.
-        
-        zpl = f
-        ^XA
-        ^FO170,25
-        ^BQN,2,4
-        ^FDLA,{data_text}^FS
-        ^FO100,220
-        ^A0N,14,14
-        ^FB400,3,0,C,0
-        ^FD{data_text}^FS
-        ^XZ
-        
-        return zpl
-
-    def print_checked_rows(self):
-        if not self.data_list:
-            print("⚠ Aucune ligne cochée !")
-            return
-
-        printer_name = "ZDesigner ZT230-200dpi ZPL"  # Nom exact de ton imprimante dans Windows
-        hPrinter = win32print.OpenPrinter(printer_name)
-
-        try:
-            hJob = win32print.StartDocPrinter(hPrinter, 1, ("Label Print", None, "RAW"))
-            win32print.StartPagePrinter(hPrinter)
-
-            for data in self.data_list:
-                data_text = f"Designation:{data['designation']}, Reference:{data['reference']}"
-                if data["lot"] == "nan":
-                    data_text += ", Lot: N/A"
-                else: 
-                    data_text += f", Lot:{data['lot']}"
-                zpl_command = self.generate_zpl(data_text)
-                win32print.WritePrinter(hPrinter, zpl_command.encode("utf-8"))
-
-            win32print.EndPagePrinter(hPrinter)
-            win32print.EndDocPrinter(hPrinter)
-        finally:
-            win32print.ClosePrinter(hPrinter)
-"""

@@ -83,13 +83,13 @@ class DragDropElement(QWidget):
 
     def dropEvent(self, event):
         urls = event.mimeData().urls()
-        print(urls)
+        #print(urls)
         if not urls:
             return 
         path = urls[0].toLocalFile()
         if path.endswith('.xlsx'):
             self.load_excel_file(path)
-            print("File loaded successfully:", path)
+            #print("File loaded successfully:", path)
             self.signal.emit(self.data)
        
             
@@ -106,24 +106,49 @@ class DragDropElement(QWidget):
         try:
             df = pd.read_excel(file_path)
 
-            # Colonnes d'intérêt normalisées
-            desired_cols = ["référence", "N° lot", "designation"]
-            desired_cols_norm = [self.normalize_column_name(c) for c in desired_cols]
+            # Synonymes attendus
+            TARGETS = {
+                "reference": ["reference", "ref", "referencearticle"],
+                "lot": ["lot", "nlot", "nolot", "numerodelot", "numlot"],
+                "designation": ["designation", "design", "desc", "description"]
+            }
 
-            # Créer un mapping normalisé -> original
-            col_map = {self.normalize_column_name(col): col for col in df.columns}
+            # Normalise colonnes Excel
+            normalized_map = {self.normalize_column_name(col): col for col in df.columns}
 
-            # Sélectionner uniquement les colonnes présentes
-            selected_cols = [col_map[c] for c in desired_cols_norm if c in col_map]
+            selected_cols = {}
 
-            self.data = df[selected_cols]
-            self.data.columns = ["référence", "lot", "designation"] 
-            self.data = self.data[~self.data.apply(lambda row: row.astype(str).str.lower().str.contains("ne pas utiliser", case=False, na=False).any(), axis=1)]
-            self.data = self.data[~self.data.apply(lambda row: row.astype(str).str.lower().str.contains("ne plus utiliser", case=False, na=False).any(), axis=1)]
-            self.data = self.data[~self.data.apply(lambda row: row.astype(str).str.lower().str.contains("non existant", case=False, na=False).any(), axis=1)]
+            # Chercher la vraie colonne correspondant à chaque champ cible
+            for target, synonyms in TARGETS.items():
+                for syn in synonyms:
+                    syn_norm = self.normalize_column_name(syn)
+                    if syn_norm in normalized_map:
+                        selected_cols[target] = normalized_map[syn_norm]
+                        break
 
-            self.show_data()
+            # Vérifier si tout est trouvé
+            if len(selected_cols) != 3:
+                #print("⚠ Colonnes manquantes dans l'Excel ! Trouvées :", selected_cols)
+                return None
 
+            # Extraire dans l’ordre souhaité
+            self.data = df[[selected_cols["reference"],
+                            selected_cols["lot"],
+                            selected_cols["designation"]]]
+
+            # Renommer les colonnes
+            self.data.columns = ["référence", "lot", "designation"]
+
+            # Filtrer les lignes interdites
+            for expr in ["ne pas utiliser", "ne plus utiliser", "non existant"]:
+                self.data = self.data[
+                    ~self.data.apply(
+                        lambda row: row.astype(str).str.lower().str.contains(expr, na=False).any(),
+                        axis=1
+                    )
+                ]
+
+            #self.show_data()
         except Exception as e:
             print(f"Error loading Excel file: {e}")
             return None

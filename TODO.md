@@ -6,9 +6,10 @@ Suivi des tâches et priorités pour le développement de l’application deskto
 
     - Faire un menu collapsible
     - Moderniser le popup
-    - Faire un menu pour l'imprimante 
-    - Imprimer sur imprimante classique
     - Possibilité d'ajouter une ligne par défaut en entrée
+    - Moderniser le menu (vertical)
+    - Ajouter l'accès par fichier
+    - Ajouter le formatage de l'impression pour imprimante classique
 
 
 
@@ -19,16 +20,17 @@ Suivi des tâches et priorités pour le développement de l’application deskto
 
 ## 🟡 En cours
 
-        - Moderniser le menu (vertical)
 
 
 ## 🔴 Bloqué / À valider
+  
 
 
 ## ✅ Fait
-
+    - Faire un menu pour l'imprimante 
+    - Imprimer sur imprimante classique
     - Refactoriser les btn
-    -Ajouter un bouton add au menu
+    - Ajouter un bouton add au menu
     - Ajouter le bouton supprimer
     - Imprimer le qr code
     - Faire une impression manuel 

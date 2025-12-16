@@ -1,6 +1,10 @@
 import unicodedata
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QPalette
+from PIL import Image
+import win32ui
+import win32con
+
 
 def normalize_column_name(name: str) -> str:
     """Normalise un nom de colonne : minuscules + suppression des accents + suppression des espaces inutiles"""
@@ -8,6 +12,21 @@ def normalize_column_name(name: str) -> str:
     name = unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').decode('ASCII')
     return name
 
+
+
+def convert_pil_to_win32_bitmap(pil_image: Image.Image):
+    """Convertit une image PIL en bitmap Windows compatible PyCDC."""
+    dib = Image.frombytes("RGB", pil_image.size, pil_image.tobytes(), "raw", "RGB")
+    # On convertit en DIB Windows
+    bmp = win32ui.CreateBitmap()
+    bmp.CreateCompatibleBitmap(win32ui.CreateDC(), pil_image.width, pil_image.height)
+    hdc = win32ui.CreateDC()
+    hdc.CreateCompatibleDC()
+    old = hdc.SelectObject(bmp)
+    hdc.BitBlt((0, 0), pil_image.size, dib, (0, 0), win32con.SRCCOPY)
+    hdc.SelectObject(old)
+    hdc.DeleteDC()
+    return bmp
 
 
 def detect_dark_mode()->bool:
