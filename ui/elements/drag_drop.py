@@ -1,9 +1,9 @@
 import os 
 import pandas as pd
 import unicodedata
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
+from PyQt6.QtWidgets import QWidget, QVBoxLayout,QFileDialog, QLabel, QGraphicsDropShadowEffect
 from PyQt6.QtGui import QFont, QIcon, QColor
-from PyQt6.QtCore import Qt, pyqtSignal, QSize
+from PyQt6.QtCore import Qt, pyqtSignal, QSize, QStandardPaths
 from core.utils import detect_dark_mode
 
 
@@ -63,10 +63,15 @@ class DragDropElement(QWidget):
         self.label_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Texte
-        self.label_text = QLabel("Déposez votre fichier Excel ici", self.container)
+        self.label_text = QLabel(
+            'Déposez votre fichier Excel <a href="#">ici</a>', 
+            self.container
+            )
         self.label_text.setFont(QFont("Segoe UI", 10))
         self.label_text.setStyleSheet(f"color: {text_color};")
         self.label_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_text.setOpenExternalLinks(False)
+        self.label_text.linkActivated.connect(self.acces_file_from_desktop)
 
         # Ajouter au layout interne
         inner_layout.addWidget(self.label_icon)
@@ -93,7 +98,18 @@ class DragDropElement(QWidget):
             self.signal.emit(self.data)
        
             
-
+    def acces_file_from_desktop(self):
+        """Ouvre une boîte de dialogue pour sélectionner un fichier Excel depuis le bureau."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Choisir un fichier Excel",
+            QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation),
+            "Excel Files (*.xlsx *.xls)"
+        )
+        if file_path:
+            self.load_excel_file(file_path)
+            self.signal.emit(self.data)
+        
     def normalize_column_name(self,name: str) -> str:
         """Normalise un nom de colonne : minuscules + suppression des accents + suppression des espaces inutiles"""
         name = str(name).strip().lower()

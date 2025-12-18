@@ -1,7 +1,8 @@
-from core.utils import generate_zpl
+from core.utils import generate_zpl, convert_mm_to_px
 from core.qr_system import QRCodeGenerator
+from core.loader_json import JSONLoader
 from PIL import Image
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QRect
 from PyQt6.QtWidgets import QMessageBox,QDialog,QPushButton,QLabel, QComboBox,QVBoxLayout,QHBoxLayout, QToolButton
 from PyQt6.QtGui import QIcon,QImage, QPainter
 from PyQt6.QtPrintSupport import QPrinter, QPrintDialog
@@ -148,25 +149,126 @@ def print_classic(
         parent=None
         ):
     """Fonction d'impression pour les imprimantes classiques."""
-    
+
     if not data_list:
         print("Aucune donnée à imprimer.")
         return
+    # Chargement de la configuration d'impression
+    cfg = JSONLoader("config/print_classic.json")
+    
+    # Récupération des paramètres d'impression
+    qr_size:int = cfg.get("qr.size_mm")
+    font_size :int = cfg.get("font.size_pt")
+    bloc_text_height:int = cfg.get("offset.text.height_mm")
+    bloc_text_width:int = cfg.get("offset.text.width_mm")
+    offset_qr:dict[str,str] = cfg.get("offset.qr")
+    offset_text:dict[str,str] = cfg.get("offset.text")
+    num_qr_printed:int = cfg.get("stats.nb_qr_printed_file")
+
+
     # Création de la boite de dialogue pour sélectionner l'imprimante
     dialog = PrinterSelectionDialog(parent)
     if dialog.exec() == QDialog.DialogCode.Accepted:
         printer_name:str = dialog.get_selected_printer()
         printer = QPrinter()
         printer.setPrinterName(printer_name)
+        
+        
         painter_qt = QPainter(printer)
-        data_list = QRCodeGenerator.convert_data_to_specific_format(data_list)
-        bank_link_picutures = []
-        for data in data_list:
-            link_pictures = QRCodeGenerator.generate_qr_code(data)
-            bank_link_picutures.append(link_pictures)
-            painter_qt.drawImage(0, 0, QImage(link_pictures))
-            painter_qt.end()    
-        for link in bank_link_picutures:
+        
+        # Conversion des tailles en mm vers pixels
+        #Par défaut les unités de QPrinter sont en pixels
+        qr_size:int = convert_mm_to_px(qr_size, printer)
+        offset_qr_x:int = convert_mm_to_px(offset_qr['x_mm'], printer)
+        offset_qr_y:int = convert_mm_to_px(offset_qr['y_mm'], printer)
+        offset_text_x:int = convert_mm_to_px(offset_text['x_mm'], printer)
+        offset_text_y:int = convert_mm_to_px(offset_text['y_mm'], printer)
+        text_height:int = convert_mm_to_px(bloc_text_height, printer)
+        text_width:int = convert_mm_to_px(bloc_text_width, printer)
+
+        # Position de départ pour dessiner les QR codes
+        x:int = offset_qr_x
+        y:int = offset_qr_y
+        
+        formated_data_list = QRCodeGenerator.convert_data_to_specific_format(data_list)
+        temporary_files = []
+        
+        # Boucle qui gère la position d'impression de chaque QR code et son texte associé
+        for data in zip(formated_data_list, data_list):
+            link_pictures = QRCodeGenerator.generate_qr_code(data[0])
+            temporary_files.append(link_pictures)
+            
+          
+            image = QImage(link_pictures).scaled(
+                qr_size,
+                qr_size,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+
+            painter_qt.drawImage(
+                x,
+                y,
+                image
+            )
+            
+            if len(data[1]["designation"]) > 15:
+                data[1]["designation"] = data[1]["designation"][:12] + "..."
+            if len(data[1]["reference"]) > 15:
+                data[1]["reference"] = data[1]["reference"][:7] + "..." + data[1]["reference"][-4:]
+            if len(data[1]["lot"])>15:
+                data_lot_of = data[1]["lot"].split("CC")[0]
+                data_lot_cc = "CC"+data[1]["lot"].split("CC")[-1].split("TS")[0]
+                data_lot_ts = "TS"+data[1]["lot"].split("TS")[0]
+            
+            if len(data_lot_ts) >= 10:
+                truncated_ts = f"{data_lot_ts[:3]}...{data_lot_ts[-4:]}" if len(data_lot_ts) >= 7 else data_lot_ts
+            else:
+                truncated_ts = data_lot_ts
+            
+            text_tag = f"{data[1]['designation']}\n{data[1]['reference']}"
+          
+            text_lot = f"Lot:{data_lot_of}\n{data_lot_cc}\n{truncated_ts}"
+
+            #Texte de la désignation + référence
+            text_tag_rect = QRect(
+                x,
+                y + qr_size + offset_text_y,
+                text_width,
+                text_height
+            )
+            painter_qt.drawText(
+                text_tag_rect,
+                Qt.AlignmentFlag.AlignLeft | Qt.TextFlag.TextWordWrap,
+                text_tag
+            )
+
+
+            #Texte du lot
+            text_lot_rect = QRect(
+                x,
+                y + qr_size + text_height/2 +  2*offset_text_y + 5,
+                text_width,
+                text_height
+            )
+
+            painter_qt.drawText(
+                text_lot_rect,
+                Qt.AlignmentFlag.AlignLeft | Qt.TextFlag.TextWordWrap,
+                text_lot
+            )
+
+            num_qr_printed += 1
+            if num_qr_printed % 5 == 0:
+                x = offset_qr_x  # Réinitialise x à la marge de gauche
+                y += qr_size + offset_qr_y + text_height +2*offset_text_y  # Avance y pour la nouvelle ligne            
+            else:
+                x += qr_size + offset_text_x  # Avance x pour le prochain QR code
+
+        #hors boucle pour éviter d'ouvrir et fermer plusieurs fois l'imprimante
+        painter_qt.end()    
+        for link in temporary_files:
+            #suppression des images temporaires après impression
             QRCodeGenerator.delete_qr_code(link)
         return
     else:

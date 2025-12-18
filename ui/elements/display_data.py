@@ -11,7 +11,11 @@ from core.utils import normalize_column_name, detect_dark_mode
 
 
 class DisplayDataElement(QWidget):
+    """
+    Display and manage a data table with search and action buttons.
+    """
     def __init__(self, parent=None):
+        """ Initialize the DisplayDataElement."""
         super().__init__(parent)
 
         is_dark_mode = detect_dark_mode()
@@ -100,6 +104,7 @@ class DisplayDataElement(QWidget):
 
     
     def add_items(self):
+        """Ajoute une nouvelle ligne via une popup"""
         dialog = PopUpAddItem(self)
         if dialog.exec() == PopUpAddItem.DialogCode.Accepted:
             data = dialog.get_data()
@@ -138,6 +143,7 @@ class DisplayDataElement(QWidget):
 
     # --- Affichage des données ---
     def show_data(self, df: pd.DataFrame):
+        """Affiche les données dans le tableau"""
         if df is None or df.empty:
             self.table.setRowCount(0)
             self.table.setColumnCount(0)
@@ -170,8 +176,8 @@ class DisplayDataElement(QWidget):
 
     # --- Récupération des lignes cochées ---
     def row_is_checked(self) -> list[dict[str,str]]:
+        """Retourne les données des lignes cochées sous forme de liste de dictionnaires"""
         self.data_checked = []
-
         headers = {normalize_column_name(self.table.horizontalHeaderItem(col).text()): col
                    for col in range(self.table.columnCount())
                    if self.table.horizontalHeaderItem(col)}
@@ -207,6 +213,7 @@ class DisplayDataElement(QWidget):
 
     # --- Rafraîchissement ---
     def on_refresh(self):
+        """Retourne à la vue principale"""
         parent_window = self.window()
         if hasattr(parent_window, "stackWidget"):
             parent_window.stackWidget.setCurrentIndex(0)

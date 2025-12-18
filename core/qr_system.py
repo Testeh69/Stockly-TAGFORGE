@@ -5,11 +5,15 @@ import os
 
 class QRCodeGenerator:
     """
-    Classe pour générer des QR codes à partir de données JSON.
+    Classe pour générer des QR codes à partir de données JSON, manipuler.
     """
     @staticmethod
-    def convert_data_to_specific_format(data:dict[str,str]) -> dict[str,str]:
+    def convert_data_to_specific_format(
+            data:dict[str,str]
+        ) -> dict[str,str]:
+        
         """Convertit les données au format spécifique attendu pour le QR code dans generate8QR_Code."""
+        
         list_data = []
         for sp_data in data:
             data_text = f"Designation:{sp_data['designation']}, Reference:{sp_data['reference']}"
@@ -27,11 +31,12 @@ class QRCodeGenerator:
         else:
             path_output = f"qr_code_{uuid.uuid4()}.png"
         json_data = json.dumps(data)
+       
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
+            box_size=5,
+            border=2,
         )
         qr.add_data(json_data)
         qr.make(fit=True)
@@ -39,6 +44,7 @@ class QRCodeGenerator:
         img.save(path_output)
         return path_output
 
+    @staticmethod
     def delete_qr_code(path_file:str):
         """Supprime le fichier QR code généré."""
         if os.path.exists(path_file):

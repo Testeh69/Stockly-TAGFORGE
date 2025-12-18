@@ -1,0 +1,32 @@
+{
+  "font": {
+    "family": "Arial",
+    "size_pt": 12
+  },
+
+  "qr": {
+    "size_mm": 18,
+    "border_mm": 2
+  },
+
+  "layout": {
+    "spacing_mm": 5
+  },
+
+  "offset": {
+    "qr": {
+      "x_mm": 8,
+      "y_mm": 8
+    },
+    "text": {
+      "x_mm": 20,
+      "y_mm":4 ,
+      "width_mm": 60,
+      "height_mm": 30
+    }
+  },
+
+  "stats": {
+    "nb_qr_printed_file": 0
+  }
+}

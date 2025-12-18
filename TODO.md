@@ -8,7 +8,6 @@ Suivi des tâches et priorités pour le développement de l’application deskto
     - Moderniser le popup
     - Possibilité d'ajouter une ligne par défaut en entrée
     - Moderniser le menu (vertical)
-    - Ajouter l'accès par fichier
     - Ajouter le formatage de l'impression pour imprimante classique
 
 
@@ -19,6 +18,8 @@ Suivi des tâches et priorités pour le développement de l’application deskto
 
 
 ## 🟡 En cours
+    - Ajouter le formatage de l'impression pour imprimante classique
+
 
 
 
@@ -27,6 +28,7 @@ Suivi des tâches et priorités pour le développement de l’application deskto
 
 
 ## ✅ Fait
+    - Ajouter l'accès par fichier
     - Faire un menu pour l'imprimante 
     - Imprimer sur imprimante classique
     - Refactoriser les btn
