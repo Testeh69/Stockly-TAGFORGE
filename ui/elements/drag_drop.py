@@ -1,11 +1,10 @@
 import os 
 import pandas as pd
-
 import unicodedata
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
+from PyQt6.QtWidgets import QWidget, QVBoxLayout,QFileDialog, QLabel, QGraphicsDropShadowEffect
 from PyQt6.QtGui import QFont, QIcon, QColor
-from PyQt6.QtCore import Qt, pyqtSignal, QSize
-
+from PyQt6.QtCore import Qt, pyqtSignal, QSize, QStandardPaths
+from core.utils import detect_dark_mode
 
 
 class DragDropElement(QWidget):
@@ -16,26 +15,36 @@ class DragDropElement(QWidget):
         super().__init__(parent)
 
         self.setAcceptDrops(True)
-        self.setFixedSize(220, 220)  # un peu plus large
+        self.setFixedSize(220, 220)
 
-        # Layout principal (centre le conteneur)
+        is_dark_mode = detect_dark_mode()
+
+        text_color = "#FFFFFF" if is_dark_mode else "#000000"
+        icon_path = "assets/file.svg" 
+
+        # Layout principal
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Conteneur stylé
         self.container = QWidget(self)
-        self.container.setObjectName("dropContainer")  # 🔑 identifiant unique
+        self.container.setObjectName("dropContainer")
         self.container.setFixedSize(200, 200)
-        self.container.setStyleSheet("""
-              QWidget#dropContainer {
-                background-color: rgba(10, 10, 10, 0.2);
-                border: 1.5px solid #64E9EE;
+
+        bg_color = "rgba(10, 10, 10, 0.2)" if is_dark_mode else "rgba(240, 240, 240, 0.8)"
+        border_color = "#64E9EE" if is_dark_mode else "#0078D7"
+
+        # Appliquer au conteneur
+        self.container.setStyleSheet(f"""
+            QWidget#dropContainer {{
+                background-color: {bg_color};
+                border: 1.5px solid {border_color};
                 border-radius: 10px;
-            }
+            }}
         """)
 
-        # Ombre portée appliquée sur le conteneur
+        # Ombre portée
         shadow = QGraphicsDropShadowEffect(self.container)
         shadow.setBlurRadius(15)
         shadow.setXOffset(3)
@@ -43,21 +52,26 @@ class DragDropElement(QWidget):
         shadow.setColor(QColor("#64E9EE"))
         self.container.setGraphicsEffect(shadow)
 
-        # Layout interne (icône + texte)
+        # Layout interne
         inner_layout = QVBoxLayout(self.container)
         inner_layout.setContentsMargins(6, 6, 6, 6)
         inner_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Icône
         self.label_icon = QLabel(self.container)
-        self.label_icon.setPixmap(QIcon("assets/file.svg").pixmap(QSize(50, 50)))
+        self.label_icon.setPixmap(QIcon(icon_path).pixmap(QSize(100, 100)))
         self.label_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Texte
-        self.label_text = QLabel("Déposez votre fichier Excel ici", self.container)
+        self.label_text = QLabel(
+            'Déposez votre fichier Excel <a href="#">ici</a>', 
+            self.container
+            )
         self.label_text.setFont(QFont("Segoe UI", 10))
-        self.label_text.setStyleSheet("color: #bbb;")
+        self.label_text.setStyleSheet(f"color: {text_color};")
         self.label_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_text.setOpenExternalLinks(False)
+        self.label_text.linkActivated.connect(self.acces_file_from_desktop)
 
         # Ajouter au layout interne
         inner_layout.addWidget(self.label_icon)
@@ -74,17 +88,28 @@ class DragDropElement(QWidget):
 
     def dropEvent(self, event):
         urls = event.mimeData().urls()
-        print(urls)
+        #print(urls)
         if not urls:
             return 
         path = urls[0].toLocalFile()
         if path.endswith('.xlsx'):
             self.load_excel_file(path)
-            print("File loaded successfully:", path)
+            #print("File loaded successfully:", path)
             self.signal.emit(self.data)
        
             
-
+    def acces_file_from_desktop(self):
+        """Ouvre une boîte de dialogue pour sélectionner un fichier Excel depuis le bureau."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Choisir un fichier Excel",
+            QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation),
+            "Excel Files (*.xlsx *.xls)"
+        )
+        if file_path:
+            self.load_excel_file(file_path)
+            self.signal.emit(self.data)
+        
     def normalize_column_name(self,name: str) -> str:
         """Normalise un nom de colonne : minuscules + suppression des accents + suppression des espaces inutiles"""
         name = str(name).strip().lower()
@@ -97,24 +122,49 @@ class DragDropElement(QWidget):
         try:
             df = pd.read_excel(file_path)
 
-            # Colonnes d'intérêt normalisées
-            desired_cols = ["référence", "N° lot", "designation"]
-            desired_cols_norm = [self.normalize_column_name(c) for c in desired_cols]
+            # Synonymes attendus
+            TARGETS = {
+                "reference": ["reference", "ref", "referencearticle"],
+                "lot": ["lot", "nlot", "nolot", "numerodelot", "numlot"],
+                "designation": ["designation", "design", "desc", "description"]
+            }
 
-            # Créer un mapping normalisé -> original
-            col_map = {self.normalize_column_name(col): col for col in df.columns}
+            # Normalise colonnes Excel
+            normalized_map = {self.normalize_column_name(col): col for col in df.columns}
 
-            # Sélectionner uniquement les colonnes présentes
-            selected_cols = [col_map[c] for c in desired_cols_norm if c in col_map]
+            selected_cols = {}
 
-            self.data = df[selected_cols]
-            self.data.columns = ["référence", "lot", "designation"] 
-            self.data = self.data[~self.data.apply(lambda row: row.astype(str).str.lower().str.contains("ne pas utiliser", case=False, na=False).any(), axis=1)]
-            self.data = self.data[~self.data.apply(lambda row: row.astype(str).str.lower().str.contains("ne plus utiliser", case=False, na=False).any(), axis=1)]
-            self.data = self.data[~self.data.apply(lambda row: row.astype(str).str.lower().str.contains("non existant", case=False, na=False).any(), axis=1)]
+            # Chercher la vraie colonne correspondant à chaque champ cible
+            for target, synonyms in TARGETS.items():
+                for syn in synonyms:
+                    syn_norm = self.normalize_column_name(syn)
+                    if syn_norm in normalized_map:
+                        selected_cols[target] = normalized_map[syn_norm]
+                        break
 
-            self.show_data()
+            # Vérifier si tout est trouvé
+            if len(selected_cols) != 3:
+                #print("⚠ Colonnes manquantes dans l'Excel ! Trouvées :", selected_cols)
+                return None
 
+            # Extraire dans l’ordre souhaité
+            self.data = df[[selected_cols["reference"],
+                            selected_cols["lot"],
+                            selected_cols["designation"]]]
+
+            # Renommer les colonnes
+            self.data.columns = ["référence", "lot", "designation"]
+
+            # Filtrer les lignes interdites
+            for expr in ["ne pas utiliser", "ne plus utiliser", "non existant"]:
+                self.data = self.data[
+                    ~self.data.apply(
+                        lambda row: row.astype(str).str.lower().str.contains(expr, na=False).any(),
+                        axis=1
+                    )
+                ]
+
+            #self.show_data()
         except Exception as e:
             print(f"Error loading Excel file: {e}")
             return None

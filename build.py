@@ -1,4 +1,10 @@
 import PyInstaller.__main__
+"""
+Building script for StocklyTagForge application using PyInstaller.
+This script configures PyInstaller to package the application into a single executable file,
+including necessary data directories and setting application properties.
+"""
+
 
 PyInstaller.__main__.run([
     'main.py',
