@@ -1,19 +1,20 @@
-from PyQt6.QtWidgets import QPushButton
-from PyQt6.QtCore import pyqtSignal, QSize
+from PyQt6.QtWidgets import QToolButton, QVBoxLayout
+from PyQt6.QtCore import pyqtSignal, QSize,Qt
 from PyQt6.QtGui import QIcon
 from ui.elements.styles.style_btn import StyleGenericBtn
 
 
-class BtnGen(QPushButton):
+class BtnGen(QToolButton):
     signal = pyqtSignal(bool)
 
-    def __init__(self, parent=None, icon_path:str="assets/bin.svg", size:int=50):
+    def __init__(self, parent=None, icon_path:str="assets/bin.svg", size:int=50 , label: str = ""):
         super().__init__( parent)
         self.clicked.connect(self.on_click)
         self.setIcon(QIcon(f"{icon_path}"))
         self.setIconSize(QSize(size, size))
-        self.setStyleSheet(StyleGenericBtn.apply_style_btn())
-       
+        
+        self.setText(label)
+        self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
     
     
     def on_click(self):

@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout,QFileDialog, QLabel, QGraphicsD
 from PyQt6.QtGui import QFont, QIcon, QColor
 from PyQt6.QtCore import Qt, pyqtSignal, QSize, QStandardPaths
 from core.utils import detect_dark_mode
-
+from core.loader_json import JSONLoader
 
 class DragDropElement(QWidget):
 
@@ -94,7 +94,6 @@ class DragDropElement(QWidget):
         path = urls[0].toLocalFile()
         if path.endswith('.xlsx'):
             self.load_excel_file(path)
-            #print("File loaded successfully:", path)
             self.signal.emit(self.data)
        
             
@@ -123,18 +122,12 @@ class DragDropElement(QWidget):
             df = pd.read_excel(file_path)
 
             # Synonymes attendus
-            TARGETS = {
-                "reference": ["reference", "ref", "referencearticle"],
-                "lot": ["lot", "nlot", "nolot", "numerodelot", "numlot"],
-                "designation": ["designation", "design", "desc", "description"]
-            }
+            TARGETS = JSONLoader("config/filter.json")._data
 
-            # Normalise colonnes Excel
-            normalized_map = {self.normalize_column_name(col): col for col in df.columns}
-
-            selected_cols = {}
 
             # Chercher la vraie colonne correspondant à chaque champ cible
+            selected_cols = {}
+            normalized_map = {self.normalize_column_name(col): col for col in df.columns}
             for target, synonyms in TARGETS.items():
                 for syn in synonyms:
                     syn_norm = self.normalize_column_name(syn)
@@ -144,7 +137,7 @@ class DragDropElement(QWidget):
 
             # Vérifier si tout est trouvé
             if len(selected_cols) != 3:
-                #print("⚠ Colonnes manquantes dans l'Excel ! Trouvées :", selected_cols)
+                print("⚠ Colonnes manquantes dans l'Excel ! Trouvées :", selected_cols)
                 return None
 
             # Extraire dans l’ordre souhaité
@@ -153,7 +146,7 @@ class DragDropElement(QWidget):
                             selected_cols["designation"]]]
 
             # Renommer les colonnes
-            self.data.columns = ["référence", "lot", "designation"]
+            self.data.columns = ["reference", "lot", "designation"]
 
             # Filtrer les lignes interdites
             for expr in ["ne pas utiliser", "ne plus utiliser", "non existant"]:

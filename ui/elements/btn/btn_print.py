@@ -1,12 +1,12 @@
 import win32print
-from PyQt6.QtWidgets import QPushButton
-from PyQt6.QtCore import QSize
+from PyQt6.QtWidgets import QToolButton
+from PyQt6.QtCore import QSize,Qt
 from PyQt6.QtGui import QIcon
 from ui.elements.styles.style_btn import StyleGenericBtn
 from ui.elements.sub_window.menu_print import MenuPrint
 
 
-class BtnPrint(QPushButton):
+class BtnPrint(QToolButton):
 
     def __init__(self, parent=None, data_to_print:list[dict[str,str]]=None):
         super().__init__( parent)
@@ -15,9 +15,10 @@ class BtnPrint(QPushButton):
         self.setIconSize(QSize(50, 50))
         self.clicked.connect(self.on_click)
         self.data_list = None
-        self.setStyleSheet(StyleGenericBtn.apply_style_btn())
         self.display_menu_print = False
         self.menu_print = None if self.display_menu_print == False else MenuPrint()
+        self.setText("Imprimer")
+        self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
     def on_click(self):
         result = self.data_to_print()

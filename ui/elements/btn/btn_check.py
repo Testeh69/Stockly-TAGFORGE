@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QPushButton
+from PyQt6.QtWidgets import QToolButton
 from PyQt6.QtCore import pyqtSignal, Qt, QSize
 from PyQt6.QtGui import QIcon
 
@@ -6,7 +6,7 @@ from PyQt6.QtGui import QIcon
 
 
 
-class BtnCheck(QPushButton):
+class BtnCheck(QToolButton):
     toggled_signal = pyqtSignal(bool)
 
     def __init__(self, parent=None):
@@ -18,6 +18,8 @@ class BtnCheck(QPushButton):
         self.setIcon(QIcon("assets/selected.svg"))  # chemin vers ton icône
         self.setIconSize(QSize(50, 50))
         self.update_style()
+        self.setText("Sélectionner")
+        self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
         
     def on_click(self):
         checked = self.isChecked()

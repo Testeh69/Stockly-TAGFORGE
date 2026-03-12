@@ -1,7 +1,7 @@
+import pandas as pd
 from PyQt6.QtWidgets import QStackedWidget,QMainWindow, QVBoxLayout,QWidget,QHBoxLayout , QStackedWidget
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt
-
 from ui.elements.drag_drop import DragDropElement
 from ui.elements.display_data import DisplayDataElement
 
@@ -26,7 +26,7 @@ class StockTagForgeMainWindow(QMainWindow):
         centered_display = self.make_centered_widget(display_data_element)
         self.stackWidget.addWidget(centered_drag)
         self.stackWidget.addWidget(centered_display)
-        self.stackWidget.setCurrentIndex(0)
+        self.stackWidget.setCurrentIndex(1)
         container = QWidget(self)
         hbox = QHBoxLayout(container)
         hbox.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -36,7 +36,7 @@ class StockTagForgeMainWindow(QMainWindow):
         self.setCentralWidget(container)
     
 
-    def _on_file_dropped(self,data, display_element: DisplayDataElement):
+    def _on_file_dropped(self,data:pd.DataFrame, display_element: DisplayDataElement):
         self.stackWidget.setCurrentIndex(1)
         display_element.show_data(data)
 

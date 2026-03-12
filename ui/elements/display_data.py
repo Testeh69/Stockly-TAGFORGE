@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from PyQt6.QtWidgets import QTableWidget,QVBoxLayout, QTableWidgetItem, QWidget, QHBoxLayout
+from PyQt6.QtWidgets import QSizePolicy,QTableWidget,QVBoxLayout, QTableWidgetItem, QWidget, QHBoxLayout
 from PyQt6.QtCore import Qt
 from ui.elements.btn.btn_check import BtnCheck
 from ui.elements.btn.btn_print import BtnPrint
@@ -17,7 +17,7 @@ class DisplayDataElement(QWidget):
     def __init__(self, parent=None):
         """ Initialize the DisplayDataElement."""
         super().__init__(parent)
-
+        print("Initializing DisplayDataElement...")
         is_dark_mode = detect_dark_mode()
 
         # --- Composants ---
@@ -26,23 +26,49 @@ class DisplayDataElement(QWidget):
         self.search_bar_element.setFixedHeight(40)
 
         # --- Boutons ---
+        button_config = [
+            ("check", BtnCheck, {}, self.on_toggle_all),
+            ("print", BtnPrint, {"data_to_print": lambda: self.row_is_checked()}, None),
+            ("refresh", BtnGen, {"icon_path": "assets/refresh.svg", "size": 50, "label": "Actualiser"}, self.on_refresh),
+            ("add", BtnGen, {"icon_path": "assets/add.svg", "size": 50, "label": "Ajouter"}, self.add_items),
+            ("erase", BtnGen, {"icon_path": "assets/bin.svg", "size": 50, "label": "Supprimer"}, self.erase_checked_items),
+        ]
 
-        self.btn_check = BtnCheck()
-        self.btn_print = BtnPrint(data_to_print= lambda: self.row_is_checked())
-        self.btn_refresh = BtnGen(icon_path="assets/refresh.svg", size=50)
-        self.btn_add = BtnGen(icon_path="assets/add.svg", size=50)
-        self.btn_erase = BtnGen(icon_path="assets/bin.svg", size=50)
+        self.buttons = {}
 
-        # --- Connexions ---
-        self.btn_refresh.signal.connect(self.on_refresh)
-        self.btn_check.toggled_signal.connect(self.on_toggle_all)
-        self.btn_add.signal.connect(self.add_items)
-        self.btn_erase.signal.connect(self.erase_checked_items)
+        for btn_config in button_config:
+            name, btn = self.create_btn(btn_config)
+            self.buttons[name] = btn
 
-        list_btn = [self.btn_check, self.btn_print, self.btn_refresh, self.btn_add, self.btn_erase]
+        menu = QWidget()
+        menu_layout = QVBoxLayout()
+        menu_layout.setSpacing(0)
+        for btn in self.buttons.values():
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            menu_layout.addWidget(btn,1)
 
-        for btn in list_btn:
-            btn.setFixedSize(60, 60)
+        menu.setLayout(menu_layout)
+
+    
+        # --- Menu ---
+        bg = "#1A1D21" if is_dark_mode else "#0078D7"
+        border_color = "#F1F1F1" if is_dark_mode else "#0078D7"
+        border_style = "0.5px solid {}".format(border_color)
+        border_radius = "8px"
+        menu.setObjectName("menu")
+        menu.setStyleSheet(f"""
+            #menu {{
+            border-right: {border_style};
+            border-top: {border_style};
+            border-bottom:{border_style};
+            border-top-right-radius: {border_radius};
+            border-bottom-right-radius: {border_radius};
+            background-color: {bg};
+            }}
+        """)
+      
+
+
 
         # --- Tableau ---
         self.table = QTableWidget()
@@ -54,27 +80,7 @@ class DisplayDataElement(QWidget):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.cellDoubleClicked.connect(self.on_cell_double_clicked)
 
-        # --- Menu ---
-        menu = QWidget()
-        bg = "#64E9EE" if is_dark_mode else "#0078D7"
-        border = "#64E9EE" if is_dark_mode else "#0078D7"
-        menu.setStyleSheet(f"""
-            border: 1px solid {border};
-            border-radius: 8px;
-            padding: 8px;
-            background-color: {bg};
-            transition: background-color 300ms, border-color 300ms;
-        """)
-        menu_layout = QVBoxLayout()
-        menu_layout.setContentsMargins(0, 0, 0, 0)
-        menu_layout.setSpacing(0)
-        
-        menu_layout.addWidget(self.btn_check)
-        menu_layout.addWidget(self.btn_print)
-        menu_layout.addWidget(self.btn_refresh)
-        menu_layout.addWidget(self.btn_add)
-        menu_layout.addWidget(self.btn_erase)
-        menu.setLayout(menu_layout)
+
 
         # --- Layout Secondaire ---
         sub_layout = QHBoxLayout()
@@ -82,6 +88,8 @@ class DisplayDataElement(QWidget):
         sub_layout.addWidget(self.table)
         sub_layout.setSpacing(150)
         sub_layout.setContentsMargins(0, 0, 0, 0)
+
+     
         # --- Layout principal ---
         main_layout = QVBoxLayout(self)
         main_layout.addWidget(self.search_bar_element)
@@ -93,6 +101,18 @@ class DisplayDataElement(QWidget):
         # --- Données internes ---
         self.data_checked = []
         self.previous_value = None  # Pour restaurer valeur si édition annulée
+
+
+    #--- Création de bouttons:
+    def create_btn(self,btn_config):
+        name, btn_class, kwargs, callback = btn_config
+        btn = btn_class(**kwargs)
+        if callback:
+            if hasattr(btn, "signal"):
+                btn.signal.connect(callback)
+            elif hasattr(btn, "toggled_signal"):
+                btn.toggled_signal.connect(callback)
+        return name, btn
 
     # --- Gestion édition cellule ---
     def on_cell_double_clicked(self, row, col):
@@ -154,7 +174,8 @@ class DisplayDataElement(QWidget):
         self.table.setColumnCount(cols + 1)  # +1 pour checkbox
 
         # Header
-        self.table.setHorizontalHeaderLabels(["✔"] + df.columns.astype(str).tolist())
+        header = ["✔"] + df.columns.astype(str).tolist()
+        self.table.setHorizontalHeaderLabels(header)
 
         for row in range(rows):
             # Checkbox
@@ -171,6 +192,10 @@ class DisplayDataElement(QWidget):
                 self.table.setItem(row, col + 1, item)
 
         self.table.resizeColumnsToContents()
+        max_width = 300  # par exemple 300 pixels
+        for col in range(self.table.columnCount()):
+            if self.table.columnWidth(col) > max_width:
+                self.table.setColumnWidth(col, max_width)
 
 
 

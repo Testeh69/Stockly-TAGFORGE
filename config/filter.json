@@ -1,0 +1,5 @@
+{
+    "reference": ["référence","reference", "ref", "referencearticle"],
+    "lot": ["n° lot","lot", "nlot", "nolot", "numerodelot", "numlot"],
+    "designation": ["désignation","designation", "design", "desc", "description"]
+}

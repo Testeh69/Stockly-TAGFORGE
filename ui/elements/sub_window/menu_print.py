@@ -216,11 +216,32 @@ def print_classic(
                 data[1]["designation"] = data[1]["designation"][:12] + "..."
             if len(data[1]["reference"]) > 15:
                 data[1]["reference"] = data[1]["reference"][:7] + "..." + data[1]["reference"][-4:]
-            if len(data[1]["lot"])>15:
-                data_lot_of = data[1]["lot"].split("CC")[0]
-                data_lot_cc = "CC"+data[1]["lot"].split("CC")[-1].split("TS")[0]
-                data_lot_ts = "TS"+data[1]["lot"].split("TS")[0]
             
+            lot = data[1].get("lot", "")
+            data_lot_of = ""
+            data_lot_cc = ""
+            data_lot_ts = ""
+
+            if len(lot) > 15:
+                cc_index = lot.upper().find("CC")
+                ts_index = lot.upper().find("TS")
+
+                # --- OF (partie avant le premier tag trouvé) ---
+                first_tag_index = min(
+                    [i for i in (cc_index, ts_index) if i != -1],
+                    default=len(lot)
+                )
+                data_lot_of = lot[:first_tag_index]
+
+                # --- CC ---
+                if cc_index != -1:
+                    end_cc = ts_index if ts_index > cc_index else len(lot)
+                    data_lot_cc = lot[cc_index:end_cc]
+
+                # --- TS ---
+                if ts_index != -1:
+                    data_lot_ts = lot[ts_index:]
+
             if len(data_lot_ts) >= 10:
                 truncated_ts = f"{data_lot_ts[:3]}...{data_lot_ts[-4:]}" if len(data_lot_ts) >= 7 else data_lot_ts
             else:
