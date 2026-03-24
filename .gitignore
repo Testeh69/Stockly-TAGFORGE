@@ -1,0 +1,6 @@
+#Ignore virtual environment
+dist/
+build/
+__pycache__/
+test/
+venv/
