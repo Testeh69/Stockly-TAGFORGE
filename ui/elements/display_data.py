@@ -1,14 +1,10 @@
-from email import header
-
 import pandas as pd
 import numpy as np
 from PyQt6.QtWidgets import QTableWidget,QVBoxLayout, QTableWidgetItem, QWidget, QHBoxLayout, QHeaderView
 from PyQt6.QtCore import Qt
-from ui.elements.btn.btn_check import BtnCheck
-from ui.elements.btn.btn_print import BtnPrint
-from ui.elements.btn.btn import BtnGen
 from ui.elements.search_bar import SearchBarElement
 from ui.elements.pop_up_add import PopUpAddItem
+from ui.elements.main_menu import SideMenuElement
 from core.utils import normalize_column_name, detect_dark_mode
 
 
@@ -27,29 +23,22 @@ class DisplayDataElement(QWidget):
         self.search_bar_element.search_signal.connect(self.filter_data)
         self.search_bar_element.setFixedHeight(40)
 
-        # --- Boutons ---
-
-        self.btn_check = BtnCheck()
-        self.btn_print = BtnPrint(data_to_print= lambda: self.row_is_checked())
-        self.btn_refresh = BtnGen(icon_path="assets/refresh.svg", size=50)
-        self.btn_add = BtnGen(icon_path="assets/add.svg", size=50)
-        self.btn_erase = BtnGen(icon_path="assets/bin.svg", size=50)
+        # --- Menu ---
+        self.menu  = SideMenuElement(print_callback=self.row_is_checked)
+        
 
         # --- Connexions ---
-        self.btn_refresh.signal.connect(self.on_refresh)
-        self.btn_check.toggled_signal.connect(self.on_toggle_all)
-        self.btn_add.signal.connect(self.add_items)
-        self.btn_erase.signal.connect(self.erase_checked_items)
+        self.menu.btn_refresh.signal.connect(self.on_refresh)
+        self.menu.btn_check.toggled_signal.connect(self.on_toggle_all)
+        self.menu.btn_add.signal.connect(self.add_items)
+        self.menu.btn_erase.signal.connect(self.erase_checked_items)
 
-        list_btn = [self.btn_check, self.btn_print, self.btn_refresh, self.btn_add, self.btn_erase]
-
-        for btn in list_btn:
-            btn.setFixedSize(60, 60)
+   
 
         # --- Tableau ---
         self.table = QTableWidget()
-        self.table.setMinimumHeight(800)
-        self.table.setMaximumHeight(800)
+        self.table.setMinimumHeight(700)
+        self.table.setMaximumHeight(700)
         self.table.setMinimumWidth(1000)
         self.table.setMaximumWidth(1000)
         header = self.table.horizontalHeader()
@@ -61,36 +50,22 @@ class DisplayDataElement(QWidget):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.cellDoubleClicked.connect(self.on_cell_double_clicked)
 
-        # --- Menu ---
-        menu = QWidget()
-        bg = "#64E9EE" if is_dark_mode else "#0078D7"
-        border = "#64E9EE" if is_dark_mode else "#0078D7"
-        menu.setStyleSheet(f"""
-            border: 1px solid {border};
-            border-radius: 8px;
-            padding: 8px;
-            background-color: {bg};
-        """)
-        menu_layout = QVBoxLayout()
-        menu_layout.setContentsMargins(0, 0, 0, 0)
-        menu_layout.setSpacing(0)
-        
-        menu_layout.addWidget(self.btn_check)
-        menu_layout.addWidget(self.btn_print)
-        menu_layout.addWidget(self.btn_refresh)
-        menu_layout.addWidget(self.btn_add)
-        menu_layout.addWidget(self.btn_erase)
-        menu.setLayout(menu_layout)
 
+        # --- Layout Tertiaire ---
+        tertiary_layout = QVBoxLayout()
+        tertiary_layout.addWidget(self.search_bar_element)
+        tertiary_layout.addWidget(self.table)
+        tertiary_layout.setContentsMargins(0, 0, 0, 0)
+        tertiary_layout.setSpacing(30)
+        
         # --- Layout Secondaire ---
         sub_layout = QHBoxLayout()
-        sub_layout.addWidget(menu, alignment=Qt.AlignmentFlag.AlignLeft)
-        sub_layout.addWidget(self.table)
+        sub_layout.addWidget(self.menu, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter)
+        sub_layout.addLayout(tertiary_layout)
         sub_layout.setSpacing(150)
         sub_layout.setContentsMargins(0, 0, 0, 0)
         # --- Layout principal ---
         main_layout = QVBoxLayout(self)
-        main_layout.addWidget(self.search_bar_element)
         main_layout.addLayout(sub_layout)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(20)
@@ -123,7 +98,7 @@ class DisplayDataElement(QWidget):
                 # Checkbox
                 checkbox_item = QTableWidgetItem()
                 checkbox_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-                checkbox_item.setCheckState(Qt.CheckState.Checked if self.btn_check.isChecked() else Qt.CheckState.Unchecked)
+                checkbox_item.setCheckState(Qt.CheckState.Checked if self.menu.btn_check.isChecked() else Qt.CheckState.Unchecked)
                 self.table.setItem(row_position, 0, checkbox_item)
 
                 # Données
@@ -166,7 +141,7 @@ class DisplayDataElement(QWidget):
             # Checkbox
             checkbox_item = QTableWidgetItem()
             checkbox_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-            checkbox_item.setCheckState(Qt.CheckState.Checked if self.btn_check.isChecked() else Qt.CheckState.Unchecked)
+            checkbox_item.setCheckState(Qt.CheckState.Checked if self.menu.btn_check.isChecked() else Qt.CheckState.Unchecked)
             self.table.setItem(row, 0, checkbox_item)
 
             # Données

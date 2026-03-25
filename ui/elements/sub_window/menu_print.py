@@ -212,48 +212,61 @@ def print_classic(
                 image
             )
             
-            if len(data[1]["designation"]) > 15:
-                data[1]["designation"] = data[1]["designation"][:12] + "..."
-            if len(data[1]["reference"]) > 15:
-                data[1]["reference"] = data[1]["reference"][:7] + "..." + data[1]["reference"][-4:]
-            if len(data[1]["lot"])>15:
-                data_lot_of = data[1]["lot"].split("CC")[0]
-                data_lot_cc = "CC"+data[1]["lot"].split("CC")[-1].split("TS")[0]
-                data_lot_ts = "TS"+data[1]["lot"].split("TS")[0]
+            lot = data[1]["lot"]
+            data_lot_of = lot
+            data_lot_cc = ""
+            data_lot_ts = ""
+
+            if "CC" in lot or "MPNOVINTEC" in lot:
+                # On suppose que le lot est dans un format du type "OF12345CC67890" ou "OF12345MPNOVINTEC67890"
+                if "MPNOVINTEC" in lot:
+                    parts_cc = lot.split("MPNOVINTEC")
+                    data_lot_of = parts_cc[0]
+                    data_lot_cc = "MPNOVINTEC" + parts_cc[1]
+                else:
+                    parts_cc = lot.split("CC")
+                    data_lot_of = parts_cc[0]
+                    data_lot_cc = "CC" + parts_cc[1]
+
+            if "TS" in lot:
+                parts_ts = lot.split("TS")
+                data_lot_ts = "TS" + parts_ts[0]
             
-            if len(data_lot_ts) >= 10:
-                truncated_ts = f"{data_lot_ts[:3]}...{data_lot_ts[-4:]}" if len(data_lot_ts) >= 7 else data_lot_ts
-            else:
-                truncated_ts = data_lot_ts
+            text_lot = f"Lot:{data_lot_of}\n{data_lot_cc}\n{data_lot_ts}"
+
             
             text_tag = f"{data[1]['designation']}\n{data[1]['reference']}"
-          
-            text_lot = f"Lot:{data_lot_of}\n{data_lot_cc}\n{truncated_ts}"
+            text_lot = f"Lot:{data_lot_of}\n{data_lot_cc}\n{data_lot_ts}"
 
             #Texte de la désignation + référence
-            text_tag_rect = QRect(
-                x,
-                y + qr_size + offset_text_y,
-                text_width,
-                text_height
+
+            metrics = painter_qt.fontMetrics()
+
+            tag_rect = metrics.boundingRect(
+                QRect(0, 0, text_width, 1000),
+                Qt.TextFlag.TextWordWrap,
+                text_tag
             )
+
+            lot_rect = metrics.boundingRect(
+                QRect(0, 0, text_width, 1000),
+                Qt.TextFlag.TextWordWrap,
+                text_lot
+            )
+            tag_x = x
+            tag_y = y + qr_size + offset_text_y
+
+            lot_x = x
+            lot_y = tag_y + tag_rect.height() + offset_text_y
+
             painter_qt.drawText(
-                text_tag_rect,
+                QRect(tag_x, tag_y, text_width, tag_rect.height()),
                 Qt.AlignmentFlag.AlignLeft | Qt.TextFlag.TextWordWrap,
                 text_tag
             )
 
-
-            #Texte du lot
-            text_lot_rect = QRect(
-                x,
-                y + qr_size + text_height/2 +  2*offset_text_y + 5,
-                text_width,
-                text_height
-            )
-
             painter_qt.drawText(
-                text_lot_rect,
+                QRect(lot_x, lot_y, text_width, lot_rect.height()),
                 Qt.AlignmentFlag.AlignLeft | Qt.TextFlag.TextWordWrap,
                 text_lot
             )
