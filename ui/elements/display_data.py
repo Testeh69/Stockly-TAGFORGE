@@ -22,8 +22,7 @@ class DisplayDataElement(QWidget):
         self.search_bar_element = SearchBarElement()
         self.search_bar_element.search_signal.connect(self.filter_data)
         self.search_bar_element.setFixedHeight(40)
-
-
+        
         self.file_uploder_side_menu =FileUploader(fixed_size=QSize(100, 100))
         # --- Menu ---
         self.menu  = SideMenuElement(print_callback=self.row_is_checked)
@@ -35,6 +34,7 @@ class DisplayDataElement(QWidget):
         self.menu.btn_add.signal.connect(self.add_items)
         self.menu.btn_erase.signal.connect(self.erase_checked_items)
         self.menu.btn_save.signal.connect(self.on_save)
+        self.file_uploder_side_menu.data_ready.connect(self.show_data)
    
 
         # --- Tableau ---
@@ -63,8 +63,18 @@ class DisplayDataElement(QWidget):
 
         # --- Layout Tertiaire LEFT ---
         tertiary_layout_left = QVBoxLayout()
-        tertiary_layout_left.addWidget(self.file_uploder_side_menu)
-        tertiary_layout_left.addWidget(self.menu)
+        tertiary_layout_left.setContentsMargins(0, 0, 0, 0)
+        tertiary_layout_left.setSpacing(10)
+        tertiary_layout_left.addWidget(
+            self.file_uploder_side_menu,
+            alignment=Qt.AlignmentFlag.AlignHCenter
+            )
+        tertiary_layout_left.addWidget(
+            self.menu,
+            alignment=Qt.AlignmentFlag.AlignTop
+            )
+       
+        
         # --- Layout Secondaire ---
         sub_layout = QHBoxLayout()
         sub_layout.addLayout(tertiary_layout_left)

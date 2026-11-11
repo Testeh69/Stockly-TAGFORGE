@@ -36,66 +36,140 @@ class FileUploader(QWidget):
         # Conteneur stylé
         self.container = QWidget(self)
         self.container.setObjectName("dropContainer")
-        if fixed_size.width() > 20 and fixed_size.height() > 20:
+        
+        if fixed_size.width() <=100 or fixed_size.height() <=100:
             self.container.setFixedSize(fixed_size.width()-5, fixed_size.height()-5)
+              # Texte
+            self.label_text = QLabel(
+                        ' <a href="#">ici</a>', 
+                        self.container
+                        )
+            
         else:
             self.container.setFixedSize(fixed_size.width()-20, fixed_size.height()-20)
-
-        bg_color = "rgba(10, 10, 10, 0.2)" if is_dark_mode else "rgba(240, 240, 240, 0.8)"
-        border_color = "#64E9EE" if is_dark_mode else "#0078D7"
-
-        # Appliquer au conteneur
-        self.container.setStyleSheet(f"""
-            QWidget#dropContainer {{
-                background-color: {bg_color};
-                border: 1.5px solid {border_color};
-                border-radius: 10px;
-            }}
-        """)
-
-        # Ombre portée
-        shadow = QGraphicsDropShadowEffect(self.container)
-        shadow.setBlurRadius(15)
-        shadow.setXOffset(3)
-        shadow.setYOffset(3)
-        shadow.setColor(QColor("#64E9EE"))
-        self.container.setGraphicsEffect(shadow)
-
-        # Layout interne
-        inner_layout = QVBoxLayout(self.container)
-        inner_layout.setContentsMargins(6, 6, 6, 6)
-        inner_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        # Icône
-        self.label_icon = QLabel(self.container)
-        self.label_icon.setPixmap(QIcon(icon_path).pixmap(QSize(100, 100)))
-        self.label_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        # Texte
-        self.label_text = QLabel(
-            'Déposez votre fichier Excel <a href="#">ici</a>', 
-            self.container
-            )
+              # Texte
+            self.label_text = QLabel(
+                        'Déposez votre fichier Excel <a href="#">ici</a>', 
+                        self.container
+                        )
         self.label_text.setFont(QFont("Segoe UI", 10))
         self.label_text.setStyleSheet(f"color: {text_color};")
         self.label_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_text.setOpenExternalLinks(False)
         self.label_text.linkActivated.connect(self._acces_file_from_desktop)
+        
+                # --- Palette ---
+        is_compact = fixed_size.width() <= 100 or fixed_size.height() <= 100
 
-        # Ajouter au layout interne
+        if is_dark_mode:
+            background = "#172033"
+            border = "#293750"
+            accent = "#64E9EE"
+            text_color = "#EAF2FA"
+            hover_background = "#24344D"
+        else:
+            background = "#F4F7FC"
+            border = "#DCE4EF"
+            accent = "#0078D7"
+            text_color = "#243247"
+            hover_background = "#E5F0FC"
+
+        # --- Layout principal ---
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # --- Conteneur ---
+        self.container = QWidget(self)
+        self.container.setObjectName("dropContainer")
+
+        if is_compact:
+            self.container.setFixedSize(
+                fixed_size.width() - 5,
+                fixed_size.height() - 5
+            )
+            label_text = '<a href="#">IMPORTER</a>'
+            icon_size = QSize(45, 45)
+            font_size = 8
+        else:
+            self.container.setFixedSize(
+                fixed_size.width() - 20,
+                fixed_size.height() - 20
+            )
+            label_text = 'Déposez votre fichier Excel <a href="#">ici</a>'
+            icon_size = QSize(100, 100)
+            font_size = 10
+
+        # --- Style ---
+        self.container.setStyleSheet(f"""
+            QWidget#dropContainer {{
+                background-color: {background};
+                border: 1px solid {border};
+                border-radius: 10px;
+            }}
+
+            QWidget#dropContainer:hover {{
+                background-color: {hover_background};
+                border: 1.5px solid {accent};
+            }}
+        """)
+
+        # --- Ombre ---
+        shadow = QGraphicsDropShadowEffect(self.container)
+        shadow.setBlurRadius(12 if is_compact else 15)
+        shadow.setXOffset(0)
+        shadow.setYOffset(3)
+        shadow.setColor(QColor(accent))
+        self.container.setGraphicsEffect(shadow)
+
+        # --- Layout interne ---
+        inner_layout = QVBoxLayout(self.container)
+        inner_layout.setContentsMargins(4, 4, 4, 4)
+        inner_layout.setSpacing(4)
+        inner_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # --- Icône ---
+        self.label_icon = QLabel(self.container)
+        self.label_icon.setPixmap(
+            QIcon(icon_path).pixmap(icon_size)
+        )
+        self.label_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # --- Texte ---
+        self.label_text = QLabel(label_text, self.container)
+        self.label_text.setFont(QFont("Segoe UI", font_size, QFont.Weight.DemiBold))
+        self.label_text.setStyleSheet(f"""
+            QLabel {{
+                color: {text_color};
+                background: transparent;
+                border: none;
+            }}
+            QLabel a {{
+                color: {accent};
+                text-decoration: none;
+                font-weight: bold;
+            }}
+        """)
+
+        self.label_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_text.setOpenExternalLinks(False)
+        self.label_text.linkActivated.connect(
+            self._acces_file_from_desktop
+        )
+
+        # --- Assemblage ---
         inner_layout.addWidget(self.label_icon)
         inner_layout.addWidget(self.label_text)
 
-        # Ajouter le conteneur au layout principal
         main_layout.addWidget(self.container)
 
-    def _dragEnterEvent(self, event):
+    def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
         else:
             event.ignore()
 
-    def _dropEvent(self, event):
+    def dropEvent(self, event):
         # Access the file path from the dropped item
         urls = event.mimeData().urls()
         #print(urls)
@@ -117,7 +191,7 @@ class FileUploader(QWidget):
             "Excel Files (*.xlsx *.xls)"
         )
         if file_path:
-            self._load_excel_file(file_path)
+            self.load_excel_file(file_path)
             if self.imported_dataframe is not None:
                 self.data_ready.emit(self.imported_dataframe)
         
@@ -128,7 +202,7 @@ class FileUploader(QWidget):
         name = name.replace(' ', '_')
         return name
 
-    def _load_excel_file(self, file_path):
+    def load_excel_file(self, file_path):
         '''
         Charge un fichier Excel, normalise les noms de colonnes 
         et extrait les colonnes "reference", "n_lot" et "designation" 
