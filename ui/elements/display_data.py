@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
 from PyQt6.QtWidgets import QTableWidget,QVBoxLayout, QTableWidgetItem, QWidget, QHBoxLayout, QHeaderView
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QSize
 from ui.elements.search_bar import SearchBarElement
 from ui.elements.pop_up_add import PopUpAddItem
 from ui.elements.main_menu import SideMenuElement
+from ui.elements.file_uploader import FileUploader
 from core.utils import normalize_column_name, detect_dark_mode
 
 
@@ -15,14 +16,14 @@ class DisplayDataElement(QWidget):
     def __init__(self, parent=None):
         """ Initialize the DisplayDataElement."""
         super().__init__(parent)
-
         is_dark_mode = detect_dark_mode()
 
         # --- Composants ---
         self.search_bar_element = SearchBarElement()
         self.search_bar_element.search_signal.connect(self.filter_data)
         self.search_bar_element.setFixedHeight(40)
-
+        
+        self.file_uploder_side_menu =FileUploader(fixed_size=QSize(100, 100))
         # --- Menu ---
         self.menu  = SideMenuElement(print_callback=self.row_is_checked)
         
@@ -32,7 +33,8 @@ class DisplayDataElement(QWidget):
         self.menu.btn_check.toggled_signal.connect(self.on_toggle_all)
         self.menu.btn_add.signal.connect(self.add_items)
         self.menu.btn_erase.signal.connect(self.erase_checked_items)
-
+        self.menu.btn_save.signal.connect(self.on_save)
+        self.file_uploder_side_menu.data_ready.connect(self.show_data)
    
 
         # --- Tableau ---
@@ -51,17 +53,32 @@ class DisplayDataElement(QWidget):
         self.table.cellDoubleClicked.connect(self.on_cell_double_clicked)
 
 
-        # --- Layout Tertiaire ---
-        tertiary_layout = QVBoxLayout()
-        tertiary_layout.addWidget(self.search_bar_element)
-        tertiary_layout.addWidget(self.table)
-        tertiary_layout.setContentsMargins(0, 0, 0, 0)
-        tertiary_layout.setSpacing(30)
+        # --- Layout Tertiaire RIGHT---
+        tertiary_layout_right = QVBoxLayout()
+        tertiary_layout_right.addWidget(self.search_bar_element)
+        tertiary_layout_right.addWidget(self.table)
+        tertiary_layout_right.setContentsMargins(0, 0, 0, 0)
+        tertiary_layout_right.setSpacing(30)
+
+
+        # --- Layout Tertiaire LEFT ---
+        tertiary_layout_left = QVBoxLayout()
+        tertiary_layout_left.setContentsMargins(0, 0, 0, 0)
+        tertiary_layout_left.setSpacing(10)
+        tertiary_layout_left.addWidget(
+            self.file_uploder_side_menu,
+            alignment=Qt.AlignmentFlag.AlignHCenter
+            )
+        tertiary_layout_left.addWidget(
+            self.menu,
+            alignment=Qt.AlignmentFlag.AlignTop
+            )
+       
         
         # --- Layout Secondaire ---
         sub_layout = QHBoxLayout()
-        sub_layout.addWidget(self.menu, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter)
-        sub_layout.addLayout(tertiary_layout)
+        sub_layout.addLayout(tertiary_layout_left)
+        sub_layout.addLayout(tertiary_layout_right)
         sub_layout.setSpacing(150)
         sub_layout.setContentsMargins(0, 0, 0, 0)
         # --- Layout principal ---
@@ -82,6 +99,19 @@ class DisplayDataElement(QWidget):
         if item:
             self.previous_value = item.text()
             item.setText("")
+
+
+    def on_save(self):
+        """Sauvegarde les données cochées dans un fichier Excel"""
+        if not self.data_checked:
+            print("⚠ Aucune ligne cochée à sauvegarder !")
+            return
+        df_to_save = pd.DataFrame(self.data_checked)
+        try:
+            df_to_save.to_excel("stock.xlsx", index=False)
+            print("✅ Données sauvegardées dans stock_checked.xlsx")
+        except Exception as e:
+            print(f"❌ Erreur lors de la sauvegarde : {e}")
 
     
     def add_items(self):
@@ -125,6 +155,8 @@ class DisplayDataElement(QWidget):
     # --- Affichage des données ---
     def show_data(self, df: pd.DataFrame):
         """Affiche les données dans le tableau"""
+        print("debug show_data:")
+        print(df.head())
         if df is None or df.empty:
             self.table.setRowCount(0)
             self.table.setColumnCount(0)
@@ -133,12 +165,17 @@ class DisplayDataElement(QWidget):
         rows, cols = df.shape
         self.table.setRowCount(rows)
         self.table.setColumnCount(cols + 1)  # +1 pour checkbox
-
         # Header
+        print(["✔"] + df.columns.astype(str).tolist())
         self.table.setHorizontalHeaderLabels(["✔"] + df.columns.astype(str).tolist())
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.setColumnWidth(0, 40)  # checkbox
+        self.table.setColumnWidth(1, 150)  # référence
 
         for row in range(rows):
             # Checkbox
+
             checkbox_item = QTableWidgetItem()
             checkbox_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
             checkbox_item.setCheckState(Qt.CheckState.Checked if self.menu.btn_check.isChecked() else Qt.CheckState.Unchecked)
@@ -150,8 +187,9 @@ class DisplayDataElement(QWidget):
                 item = QTableWidgetItem(val)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.table.setItem(row, col + 1, item)
+        self.table.resizeColumnToContents(2)  # lot
+        self.table.resizeColumnToContents(3)  # designation
 
-        self.table.resizeColumnsToContents()
 
 
 

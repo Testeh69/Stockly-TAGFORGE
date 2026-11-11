@@ -29,6 +29,6 @@ class BtnCheck(QToolButton):
     def update_style(self):
         self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
         if self.isChecked():
-            self.setStyleSheet(f"background-color: green; color: white; border-top-right-radius: 5px;")
+            self.setStyleSheet(f"background-color: green; color: white; border-top-right-radius: 7px;")
         else:
-            self.setStyleSheet(f"background-color: none; color: black; border-top-right-radius: 5px;")
+            self.setStyleSheet(f"background-color: none; color: black; border-top-right-radius: 7px;")

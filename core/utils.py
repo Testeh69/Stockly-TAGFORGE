@@ -76,8 +76,8 @@ def generate_zpl(
         ^FO170,25
         ^BQN,2,4
         ^FDLA,{data_text}^FS
-        ^FO100,220
-        ^A0N,14,14
+        ^FO100,180
+        ^A0N,18,18
         ^FB400,3,0,C,0
         ^FD{data_text}^FS
         ^XZ
