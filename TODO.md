@@ -3,12 +3,17 @@
 Suivi des tâches et priorités pour le développement de l’application desktop StocklyTagForgeApp.
 
 ## 🟢 À faire (Backlog)
+<<<<<<< HEAD
 
     - Faire un menu collapsible
     - Moderniser le popup
     - Possibilité d'ajouter une ligne par défaut en entrée
     - Moderniser le menu (vertical)
     - Ajouter le formatage de l'impression pour imprimante classique
+=======
+    - Faire un système d'impression en cours
+
+>>>>>>> origin/menu-etiquette
 
 
 
@@ -18,12 +23,20 @@ Suivi des tâches et priorités pour le développement de l’application deskto
 
 
 ## 🟡 En cours
+<<<<<<< HEAD
     - Ajouter le formatage de l'impression pour imprimante classique
 
+=======
+    - Sauvegarder les fichiers
+>>>>>>> origin/menu-etiquette
 
 
 
 ## 🔴 Bloqué / À valider
+<<<<<<< HEAD
+=======
+     - Tableau avec largeur de taille fixe
+>>>>>>> origin/menu-etiquette
   
 
 

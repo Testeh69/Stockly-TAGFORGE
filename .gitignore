@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 test
 monenv
 dist
 build
 __pycache__
 test
+=======
+#Ignore virtual environment
+dist/
+build/
+__pycache__/
+test/
+venv/
+>>>>>>> origin/menu-etiquette

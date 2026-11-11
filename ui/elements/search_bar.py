@@ -6,7 +6,7 @@ from core.utils import detect_dark_mode
 
 
 class SearchBarElement(QLineEdit):
-
+    
 
     search_signal = pyqtSignal(str, name="search")
 

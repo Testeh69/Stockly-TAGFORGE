@@ -30,8 +30,7 @@ class QRCodeGenerator:
             path_output = os.path.join(path_folder, f"qr_code_{uuid.uuid4()}.png")
         else:
             path_output = f"qr_code_{uuid.uuid4()}.png"
-        json_data = json.dumps(data)
-       
+        json_data = json.dumps(data, ensure_ascii=False)
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
