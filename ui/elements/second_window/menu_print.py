@@ -1,6 +1,6 @@
 from core.utils import generate_zpl, convert_mm_to_px
 from core.qr_system import QRCodeGenerator
-from core.loader_json import JSONLoader
+from core.loader_json import ConfigManager
 from PIL import Image
 from PyQt6.QtCore import Qt, QRect
 from PyQt6.QtWidgets import QMessageBox,QDialog,QPushButton,QLabel, QComboBox,QVBoxLayout,QHBoxLayout, QToolButton
@@ -154,7 +154,7 @@ def print_classic(
         print("Aucune donnée à imprimer.")
         return
     # Chargement de la configuration d'impression
-    cfg = JSONLoader("config/print_classic.json")
+    cfg = ConfigManager("config/print_classic.json")
     
     # Récupération des paramètres d'impression
     qr_size:int = cfg.get("qr.size_mm")

@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QToolButton
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QIcon
 from ui.elements.styles.style_btn import StyleGenericBtn
-from ui.elements.sub_window.menu_print import MenuPrint
+from ui.elements.second_window.menu_print import MenuPrint
 
 
 class BtnPrint(QToolButton):

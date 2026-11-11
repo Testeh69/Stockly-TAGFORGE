@@ -6,20 +6,22 @@ from ui.elements.btn.btn import BtnGen
 from core.utils import detect_dark_mode
 
 class SideMenuElement(QWidget):
-    def __init__(self, parent=None, print_callback=None):
+    def __init__(self, parent=None, print_callback=None, on_data_ready=None):
         super().__init__(parent)
         
         is_dark_mode = detect_dark_mode()
+
+        
         
         # --- Création des boutons ---
         self.btn_check = BtnCheck()
-        # On passe la fonction de callback pour le bouton print
         self.btn_print = BtnPrint(data_to_print=print_callback)
         self.btn_refresh = BtnGen(icon_path="assets/refresh.svg", text = "ACTUALISER", size=50)
         self.btn_add = BtnGen(icon_path="assets/add.svg", text="AJOUTER", size=50)
-        self.btn_erase = BtnGen(icon_path="assets/bin.svg", text="SUPPRIMER", size=50, style = f"border-bottom-right-radius:5px;")
+        self.btn_erase = BtnGen(icon_path="assets/bin.svg", text="SUPPRIMER", size=50)
+        self.btn_save = BtnGen(icon_path="assets/save.svg", text="SAUVEGARDER", size=50, style = f"border-bottom-right-radius:7px;")
 
-        self.list_btn = [self.btn_check, self.btn_print, self.btn_refresh, self.btn_add, self.btn_erase]
+        self.list_btn = [self.btn_check, self.btn_print, self.btn_refresh, self.btn_add, self.btn_erase, self.btn_save]
         
        
 
